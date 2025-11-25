@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CarsService } from '../cars-service';
 
 @Component({
   selector: 'app-main-cars',
@@ -6,6 +7,19 @@ import { Component } from '@angular/core';
   templateUrl: './main-cars.html',
   styleUrls: ['./main-cars.scss'],
 })
-export class MainCars {
+export class MainCars{
+  protected cars: any[] = [];
+  isLoading = true;
+  error: string | null = null;
 
+  constructor(private readonly carsService: CarsService) {}
+
+  ngOnInit() {
+    this.getCars();
+  }
+  getCars(): void {
+    this.carsService.getCars().subscribe(data => {
+      console.log(data);
+    });
+  }
 }

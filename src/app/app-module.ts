@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { HttpClientModule, provideHttpClient } from '@angular/common/http';
+import { CarsModule } from './cars/cars-module';
 
 @NgModule({
   declarations: [
@@ -10,7 +11,8 @@ import { HttpClientModule, provideHttpClient } from '@angular/common/http';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    CarsModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs'; 
 
 @Injectable({
   providedIn: 'root',
 })
 export class CarsService {
-  
-  // getCars(): Observable<any> {
-  //  Connect to backend and display things 
-  // }
+  private apiUrl = 'http://localhost:3000/car';
+  constructor(private http: HttpClient) {}
+
+  getCars(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
 }
