@@ -1,0 +1,30 @@
+button{
+    margin-right: 12px;
+}
+
+.container{
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    padding: 20px 10px 10px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.card{
+    cursor: pointer;
+}
+.card:hover{
+    background-color: lightgray;
+}
+nav{
+    position: absolute;
+    top: 88%;
+    left: 40%;
+}
+.page-link{
+    cursor: pointer;
+}
