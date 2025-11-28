@@ -7,6 +7,8 @@ import { CarsModule } from './cars/cars-module';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { SharedModule } from './shared/shared-module';
 import { Header } from './shared/header/header';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { Header } from './shared/header/header';
     RouterOutlet,
     RouterLink,
     SharedModule,
-    CarsModule
+    FormsModule,
+    CarsModule,
+    NgbModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

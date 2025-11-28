@@ -1,91 +1,39 @@
-<!-- <table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Lp</th>
-      <th>Marka</th>
-      <th>Model</th>
-      <th>Cena</th>
-      <th>Opcje</th>
-    </tr>
-  </thead>
 
-  <tbody>
-    <tr [routerLink] = "['/view-car', car.id]" *ngFor="let car of pagedCars">
-        <td>{{ car.id }}</td>
-      <td>{{ car.brand }}</td>
-      <td>{{ car.model }}</td>
-      <td>{{ car.price }} zł/h</td>
-
-      <td class="nowrap">
-        <button class="btn btn-outline-warning btn-sm">
-          <i class="bi bi-pencil">Zmodyfikuj</i>
-        </button>
-        <button class="btn btn-outline-danger btn-sm" (click)="delCar(car.id, $event)">
-          <i class="bi bi-trash">Usuń</i>
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<nav *ngIf="totalPages > 1" class="">
-  <ul class="pagination justify-content-center">
-
-    <li class="page-item" [class.disabled]="currentPage === 1">
-      <a class="page-link" (click)="goToPage(currentPage - 1)">Previous</a>
-    </li>
-
-    <li 
-      class="page-item" 
-      *ngFor="let p of [].constructor(totalPages); let i = index"
-      [class.active]="currentPage === (i + 1)"
-    >
-      <a class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
-    </li>
-
-    <li class="page-item" [class.disabled]="currentPage === totalPages">
-      <a class="page-link" (click)="goToPage(currentPage + 1)">Next</a>
-    </li>
-
-  </ul>
-</nav> -->
-
+<button type="button" class="add-car-button btn btn-outline-success">Add Car</button>
 <div class="container mt-4">
   <div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col" *ngFor="let car of pagedCars">
-      <div class="card h-100" [routerLink]="['/view-car', car.id]">
-        <div class="card-body">
-          <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-          <p class="card-text">Cena: <b>{{ car.price }} zł/h</b></p>
-        </div>
-        <div class="card-footer d-flex f-diretion-column gap-2">
-
-
-          <button class="btn btn-outline-dark btn-sm">
-            <i class="bi bi-pencil">Zmodyfikuj</i>
-          </button>
-          <button class="btn btn-outline-danger btn-sm" (click)="delCar(car.id, $event)">
-            <i class="bi bi-trash">Usuń</i>
-          </button> 
+    @for (car of pagedCars; track car) {
+      <div class="col">
+        <div class="card h-100" [routerLink]="['/view-car', car.id]">
+          <div class="card-body">
+            <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+            <p class="card-text">Cena: <b>{{ car.price }} zł/h</b></p>
+          </div>
+          <div class="card-footer d-flex justify-content-center">
+            <button class="btn btn-outline-secondary w-100">Więcej Szczegółów</button>
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>
 
-  <nav *ngIf="totalPages > 1" class="mt-4">
+@if (totalPages > 1) {
+  <nav class="mt-4">
     <ul class="pagination justify-content-center">
-
       <li class="page-item" [class.disabled]="currentPage === 1">
         <a class="page-link" (click)="goToPage(currentPage - 1)">Previous</a>
       </li>
-      <li 
-        class="page-item" 
-        *ngFor="let p of [].constructor(totalPages); let i = index"
-        [class.active]="currentPage === (i + 1)">
-        <a class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
-      </li>
+      @for (p of [].constructor(totalPages); track p; let i = $index) {
+        <li
+          class="page-item"
+          [class.active]="currentPage === (i + 1)">
+          <a class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
+        </li>
+      }
       <li class="page-item" [class.disabled]="currentPage === totalPages">
         <a class="page-link" (click)="goToPage(currentPage + 1)">Next</a>
       </li>
     </ul>
   </nav>
+}

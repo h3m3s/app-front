@@ -1,0 +1,28 @@
+<form #carForm="ngForm" (ngSubmit)="onSave()">
+    <div>
+        <label for="brand" class="form-label">Podaj Markę</label>
+        <input name="brand" [(ngModel)]="carInputForm.brand" class="form-control" id="brand">
+    </div>
+    <div>
+        <label for="model" class="form-label">Podaj Model</label>
+        <input name="model" [(ngModel)]="carInputForm.model" class="form-control" id="model">
+    </div>
+    <div>
+        <label for="price" class="form-label" >Podaj Podaj Cene</label>
+        <input name="price" [(ngModel)]="carInputForm.price" class="form-control" id="price">
+    </div>
+    <div>
+       <label for="photo" class="form-label">Wybierz Zdjęcie</label>
+       <input
+            type="file"
+            id="photo"
+            class="form-control"
+            accept=".webp,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event)"
+        >
+    <div *ngIf="fileError" class="text-danger mt-1">{{ fileError }}</div>
+    <img *ngIf="previewDataUrl" [src]="previewDataUrl" alt="preview" class="img-thumbnail mt-2" style="max-width:200px;">
+    </div>
+    <button class="btn btn-outline-secondary" type="reset" (click)="onClose()">Wyjdź</button>
+    <button class="btn btn-outline-success">Potwierdź</button>
+</form>

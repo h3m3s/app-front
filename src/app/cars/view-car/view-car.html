@@ -1,6 +1,29 @@
-<div class="card" >
-    <div class="row">Marka <span>{{car.brand}}</span></div>
-    <div class="row">Model <span>{{car.model}}</span></div>
-    <div class="row">Cena <span>{{car.price}}zł/h</span></div>
-    <div class="row">Opis <span>Sportowy samochód z silnikiem 3.0L turbo, oferujący doskonałe osiągi i dynamiczną jazdę.</span></div>
+
+<button type="button" class="btn btn-outline-primary go-back-btn" routerLink="/main-cars"> Zamknij</button>
+<div class="container mt-4">
+  <div class="card" >
+      <div class="row">Marka <span>{{car?.brand}}</span></div>
+      <div class="row">Model <span>{{car?.model}}</span></div>
+      <div class="row">Cena <span>{{car?.price}}zł/h</span></div>
+      <div class="row">Identyfikator Pojazdu <span>#{{car?.id}}</span></div>
+      <div class="menage-buttons">
+        <button class="btn btn-outline-warning" (click)="openModal('mod', $event,  car)">Modyfikuj</button>
+        <button class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button>
+      </div>
+  </div>
+  <div class="card image position-relative">
+      <div *ngIf="isLoadingImage" class="spinner-overlay">
+        <div class="spinner-border text-light" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <img 
+        [src]="car?.photo? '/img/' + car.photo : '/missing-image.webp'" 
+        alt="Car image"
+        class="img-fluid"
+        (load)="onImageLoad()"
+        (error)="onImageError($event)"
+        [class.d-none]="isLoadingImage">
+  </div>
 </div>

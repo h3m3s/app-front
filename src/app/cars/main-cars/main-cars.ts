@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CarsService } from '../cars-service';
 
+
+
 @Component({
   selector: 'app-main-cars',
   standalone: false,
@@ -17,7 +19,9 @@ export class MainCars implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private readonly carsService: CarsService) {}
+  constructor(
+    private readonly carsService: CarsService,
+  ) {}
 
   ngOnInit() {
     this.getCars();
@@ -36,7 +40,7 @@ export class MainCars implements OnInit {
       }
     });
   }
-
+  
   paginate(): void {
     const start = (this.currentPage - 1) * this.rowsPerPage;
     const end = start + this.rowsPerPage;
@@ -52,13 +56,5 @@ export class MainCars implements OnInit {
     return Math.ceil(this.cars.length / this.rowsPerPage);
   }
 
-  delCar(id: number, e:Event): void {
-    e.stopPropagation();
-    const confirmation = window.confirm(`Do you want to delete car: ${id}?`);
-    if (confirmation) {
-      this.carsService.delCar(id).subscribe(() => {
-        this.getCars();
-      });
-    }
-  }
+  
 }

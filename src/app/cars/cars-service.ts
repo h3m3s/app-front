@@ -19,6 +19,9 @@ export class CarsService {
     const url = `${this.apiUrl}/id/${id}`;
     return this.http.get<CarsModule>(url);
   }
+  updateCar(car: CarsModule): Observable<CarsModule> {
+    return this.http.put<CarsModule>(this.apiUrl, car);
+  }
   delCar(id: number): Observable<CarsModule> {
     const url = `${this.apiUrl}/${id}`;
     return this.http.delete(url);

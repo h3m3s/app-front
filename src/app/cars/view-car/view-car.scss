@@ -1,14 +1,110 @@
-.card{
-    background-color: #303030;
-    border: 1px solid black;
+.go-back-btn{
+    position: absolute;
+    top: 20px;
+    right: 40px;
+}
+/* GŁÓWNY CONTAINER – desktop: obraz obok danych */
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
     padding: 20px 10px 10px 30px;
-    margin: 10px;
-    width: 30%;
-    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* KARTA Z DANYMI */
+.card {
+    background-color: #1d1d1d;
+    color: white;
+    border: 1px solid white;
+    padding: 20px 30px 20px 30px; /* więcej prawej! */
+    width: 40%;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-.row > span{
+.spinner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(48, 48, 48, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+/* KARTA ZE ZDJĘCIEM */
+.card.image {
+    width: 60%;
+    height: 400px;
+    padding: 0;
+    overflow: hidden;
+    object-position: center;
+}
+
+.card.image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Teksty */
+.row > span {
     font-weight: 700;
+}
+
+.menage-buttons {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ----------------------------------------------------- */
+/* RESPONSYWNOŚĆ                                         */
+/* ----------------------------------------------------- */
+
+/* TABLETY — pionowy layout, ale nadal ładny */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .card,
+    .card.image {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .card.image {
+        height: 300px;
+    }
+}
+
+/* TELEFONY — pełna kolumna i mniejsze marginesy */
+@media (max-width: 600px) {
+    .card {
+        padding: 15px 20px;
+    }
+
+    .card.image {
+        height: 250px;
+    }
+}
+
+/* MAŁE TELEFONY */
+@media (max-width: 400px) {
+    .card {
+        padding: 10px 15px;
+    }
+
+    .card.image {
+        height: 200px;
+    }
 }
