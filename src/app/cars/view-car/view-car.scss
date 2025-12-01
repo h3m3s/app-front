@@ -15,6 +15,7 @@
 .container {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 20px;
     padding: 20px 10px 10px 30px;
     overflow-y: auto;
@@ -42,11 +43,11 @@
 }
 
  
-    .card {
+.card {
         background-color: #1d1d1d;
         color: white;
-        border: 1px solid white;
-        padding: 8px 12px 8px 12px;
+        border: 1px solid #343434;
+        padding: 8px 12px;
         width: 38%;
         min-height: 320px;
         display: flex;
@@ -78,12 +79,34 @@
 }
 
  
- .card.image {
+.card.image {
      width: 50%;
     height: 360px;
     padding: 0;
     overflow: hidden;
     object-position: center;
+}
+
+.card.rentals {
+    width: 100%;
+    min-height: auto;
+}
+
+.rentals .list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0.75rem 0;
+}
+
+.rent-form .form-control {
+    background-color: #131b26;
+    border: 1px solid #2f3a4c;
+    color: #fff;
+}
+
+.rent-form .form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(43,159,255,0.18);
 }
 
 .card.image img {
@@ -111,7 +134,9 @@
 }
 
  
- 
+ .text-muted {
+    color: #aaa !important;
+ }
  
 
  
@@ -121,7 +146,8 @@
         padding: 8px;
     }
     .card,
-    .card.image {
+    .card.image,
+    .card.rentals {
         width: 100%;
         margin-left: 0;
     }

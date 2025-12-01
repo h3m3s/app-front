@@ -1,154 +1,98 @@
- 
-button {
-  margin-right: 12px;
-}
 
- 
-
-.add-car-button {
-  position: absolute;
-  top: 1%;
-  right: 8%;
-  z-index: 50; 
-}
-
-.container {
-  position: absolute;
-  left: 10%;
-  width: 80%;
-  height: 78%;
-  padding: 20px 10px 10px 30px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  overflow-y: auto;
+.cars-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
   overflow-x: hidden;
-  padding-bottom: 110px; 
-
-  
+  color: #fff;
   scrollbar-color: var(--thumb) var(--track);
   scrollbar-width: thin;
 }
 
- 
-.search-bar {
-  padding: 6px 4px; 
-}
-.search-bar .row { align-items: center; }
-.search-bar .form-control { min-width: 120px; width: 100%; }
-
-.search-bar .sort-wrapper { margin-right: 12px; }
-
- 
-.search-bar input.form-control,
-.search-bar .form-select,
-.sort-bar .form-select {
-  background-color: var(--panel);
-  border: 1px solid #2a2a2a;
-  color: #ffffff;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 0.95rem;
-}
-
- 
-.sort-wrapper {
-  display: inline-block;
-  background: var(--panel);
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  padding: 6px 10px;
-}
-.sort-wrapper .sort-label {
-  display: block;
-  color: #bdbdbd;
-}
-.sort-wrapper .sort-select {
-  background: var(--panel);
-  border: 1px solid #2a2a2a;
-  border-radius: 6px;
-  padding: 6px 8px;
-  min-width: 160px;
-  height: 36px;
-  font-size: 0.95rem;
-  -webkit-appearance: none;
-  appearance: none;
-  padding-right: 36px; 
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23bdbdbd' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-}
-.sort-wrapper .sort-select:focus { box-shadow: 0 6px 18px rgba(43,159,255,0.12); border-color: var(--accent); outline: none; }
-@media (max-width: 768px) {
-  .sort-wrapper { width: 100%; }
-  .search-bar .col-12.col-md-4, .search-bar .col-12.col-md-3, .search-bar .col-12.col-md-5 { width: 100%; }
-  .card { min-height: 260px; }
-} 
-.search-bar input.form-control::placeholder {
-  color: #bfbfbf;
-}
-  .card { min-height: 260px; }
-.search-bar input.form-control:focus,
-.search-bar .form-select:focus,
-.sort-bar .form-select:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 6px 14px rgba(43,159,255,0.12);
-}
-.search-bar .btn, .sort-bar .btn {
-  padding: 10px 14px;
-}
-
-.search-spinner { display: flex; align-items:center; }
-
-.container::-webkit-scrollbar {
+.cars-wrapper::-webkit-scrollbar {
   width: 12px;
 }
-.container::-webkit-scrollbar-track {
+.cars-wrapper::-webkit-scrollbar-track {
   background: var(--track);
   border-radius: 8px;
 }
-.container::-webkit-scrollbar-thumb {
+.cars-wrapper::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--thumb), var(--thumb-hover));
   border-radius: 8px;
   border: 3px solid transparent;
   background-clip: padding-box;
 }
-.container::-webkit-scrollbar-thumb:hover {
+.cars-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
 
-  .card {
-    cursor: pointer;
-    background-color: var(--bg);
-    border: 1px solid #2f2f2f;
-    color: #fff;
+.search-bar {
+  padding: 0.75rem 1rem;
+}
+
+.search-bar .row {
+  row-gap: 0.4rem;
+}
+
+@media (min-width: 992px) {
+  .search-bar {
+    padding: 0.5rem 1rem;
+  }
+
+  .search-bar .form-control,
+  .search-bar .form-select {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+.search-bar .form-control,
+.search-bar .form-select {
+  background-color: #1f2633;
+  border: 1px solid #3c4a5f;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-bar .form-control:focus,
+.search-bar .form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(43,159,255,0.18);
+}
+
+.search-spinner {
+  display: flex;
+  align-items: center;
+}
+
+.cars-wrapper .card {
+  cursor: pointer;
+  background-color: var(--bg);
+  border: 1px solid #2f2f2f;
+  color: #fff;
   transition: background-color .2s;
-  min-height: 300px; 
   border-radius: 8px;
   overflow: hidden;
 }
 
-.card:hover {
+.cars-wrapper .card:hover {
   background-color: rgba(73, 73, 73, 0.266);
 }
 
-  .card-footer {
-    border-top: 1px solid #2a2a2a;
-  margin-top: auto; 
+.cars-wrapper .card-footer {
+  border-top: 1px solid #2a2a2a;
+  margin-top: auto;
 }
 
- 
-  .card-img-top {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3; /* popular 4:3 aspect ratio */
-    object-fit: cover;
-    display: block;
-  }
+.cars-wrapper .card-img-top {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
 
 .image-wrapper {
   width: 100%;
@@ -158,10 +102,7 @@ button {
 
 .spinner-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
@@ -169,215 +110,85 @@ button {
   z-index: 10;
 }
 
-  .card-body {
-    height: 60px; /* reduced so image occupies more space */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    text-align: center;
-    padding: 6px 10px;
-    box-sizing: border-box;
-    font-size: 0.92rem;
-  }
- 
-  .card-body h5 {
-    font-weight: 700;
-    margin-bottom: 4px;
-    font-size: 1.02rem;
-  }
+.cars-wrapper .card-body {
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+
+.cars-wrapper .card-body h5 {
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 1.02rem;
+}
 
 .card-footer button {
   width: 100%;
 }
 
-/* Highlight the center card */
-/* Highlight the center card in every row (for a 3-column layout on md and above) */
 @media (min-width: 768px) {
-  .row .col .card {
-    transition: none; /* avoid overlap */
-    box-shadow: none;
-  }
-  /* side cards - slightly smaller */
-  .row .col:nth-child(3n+1) .card,
-  .row .col:nth-child(3n+3) .card {
-    transform: none; 
-    filter: contrast(0.95); 
-  }
-  /* middle card - make it stand out */
-  .row .col:nth-child(3n+2) .card {
+  .cars-wrapper .row .col:nth-child(3n+2) .card {
     border: 2px solid #2b9fff;
     box-shadow: 0 12px 30px rgba(43,159,255,0.18);
-    transform: none; /* avoid overlap */
-    z-index: 2;
   }
-  /* slightly increase the middle card image height */
-  .row .col:nth-child(3n+2) .card .card-img-top {
-    aspect-ratio: 16 / 9; /* center card gets a slightly wider format */
+
+  .cars-wrapper .row .col:nth-child(3n+2) .card .card-img-top {
+    aspect-ratio: 16 / 9;
     transform: scale(1.03);
   }
-  /* default behavior relies on aspect-ratio for non-center cards */
 }
 
-nav {
-  position: absolute;
-  top: 40px;
-  right: 180px;
-  z-index: 100; /* ensure pagination is above cards */
-  display: flex;
-  justify-content: center;
-}
-
-/* ---------------- PAGINATION COLORS ---------------- */
 .pagination .page-link {
   background-color: #1d1d1d;
   border-color: #555;
   color: #fff;
-  cursor: pointer;
 }
+
 .pagination .page-item.disabled .page-link {
   background-color: #1e1e1e !important;
   border-color: #444 !important;
   color: #777 !important;
-  cursor: not-allowed !important;
-  opacity: 0.6;
 }
+
 .pagination .page-link:hover {
   background-color: #3a3a3a;
   border-color: #777;
-  color: #fff;
 }
+
 .pagination .page-item.active .page-link {
   background-color: #505050;
   border-color: #777;
-  color: #fff;
 }
 
-/* ========================================================= */
-/* ====================== RESPONSIVE ======================== */
-/* ========================================================= */
-
-/* ============================= */
-/* ======= LARGE TABLETS ======= */
-/* ============================= */
-
-@media (max-width: 1366px) {
-  .add-car-button {
-    top: 3%;
-    right: 5%;
+@media (max-width: 992px) {
+  .cars-wrapper {
+    padding-inline: 1rem !important;
   }
 
-  .container {
-    left: 5%;
-    width: 90%;
-    height: 80%;
-    padding: 15px;
-  }
-
-  nav {
-    position: relative;
-    margin-top: 12px;
-    left: 0;
+  .search-bar {
+    gap: 1rem;
   }
 }
 
-
-/* ============================= */
-/* ===== SMALL TABLETS / ======= */
-/* ===== LARGE PHONES     ===== */
-/* ============================= */
-
-@media (max-width: 768px) {
-
-  /* ==== USUN absolute na telefonach/tabletach ==== */
-  .add-car-button {
-    position: static;
-    margin: 10px auto;
-    display: block;
-    width: 90%;
+@media (max-width: 576px) {
+  .search-bar {
+    padding: 1.25rem;
   }
 
-  .container {
-    position: static;
-    width: 100%;
-    padding: 10px;
-    height: auto;
-    overflow-y: visible;
-  }
-  /* ensure search inputs are stacked and full width on small devices */
-  .search-bar, .sort-bar {
-    gap: 8px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .search-bar input, .search-bar .form-select, .search-bar .btn, .sort-bar .form-select, .sort-bar .btn {
-    width: 100%;
-  }
-  .card { min-height: 280px; }
-  /* add extra top spacing for inputs on small screens so inputs are lower */
-  .search-bar, .sort-bar {
-    margin-top: 18px;
-    padding-top: 6px;
-  }
-
-  nav {
-    position: static;
-    margin: 20px auto 0 auto;
-    text-align: center;
-  }
-
-  .pagination {
-    justify-content: center;
-  }
-
-  /* karty NIE mogą wyjeżdżać poza ekran */
-  .row {
-    width: 100%;
-    margin: 0;
-  }
-
-  .col {
-    padding: 0 10px;
-  }
-
-  .card {
-    width: 100%;
-  }
-}
-
-
-/* ============================= */
-/* ========= PHONES ============ */
-/* ============================= */
-
-@media (max-width: 480px) {
-  .add-car-button {
-    width: 100%;
-    margin-top: 5px;
-  }
-  .container {
-    padding: 3px;
-  }
-  .card-body {
-    padding: 4px 6px;
+  .cars-wrapper .card-body {
     font-size: 0.88rem;
   }
-  .card-body h5 {
+
+  .cars-wrapper .card-body h5 {
     font-size: 0.95rem;
-    margin-bottom: 2px;
   }
-  .card-body p {
-    font-size: 0.82rem;
-  }
-  .card-footer button {
-    font-size: 0.8rem;
-  }
-  /* Subtle center card highlight on mobile */
-  .row .col:nth-child(3n+2) .card {
-    border-width: 1.2px;
-    box-shadow: 0 4px 10px rgba(43,159,255,0.10);
-  }
+
   body, html {
-    overflow-x: hidden !important;
+    overflow-x: hidden;
   }
 }

@@ -9,8 +9,6 @@ import { NavigationEnd } from '@angular/router';
 import { AddModCar } from '../add-mod-car/add-mod-car';
 import { lastValueFrom } from 'rxjs';
 
-
-
 @Component({
   selector: 'app-main-cars',
   standalone: false,
@@ -21,6 +19,7 @@ import { lastValueFrom } from 'rxjs';
 export class MainCars implements OnInit, OnDestroy {
   protected cars: any[] = [];
   protected pagedCars: any[] = [];  
+  private filteredCars: any[] = [];
   
   rowsPerPage = 9;
   currentPage = 1;
@@ -31,6 +30,9 @@ export class MainCars implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private hasLoadedCars = false;
   private lastQueryParamsSignature: string | null = null;
+  private readonly imageLoadCache = new Map<number, boolean>();
+  private static readonly RANGE_FILTERS = ['minPrice', 'maxPrice'] as const;
+  private static readonly SEARCH_CONTROL = 'search';
   
   protected sortOption: string = 'relevance';
   protected nextSort: string = 'name.desc';
@@ -50,8 +52,7 @@ export class MainCars implements OnInit, OnDestroy {
   ngOnInit() {
     
     this.searchForm = this.fb.group({
-      brand: [''],
-      model: [''],
+      search: [''],
       minPrice: [null],
       maxPrice: [null],
       sort: [this.sortOption]
@@ -64,6 +65,9 @@ export class MainCars implements OnInit, OnDestroy {
         const { criteria, hasCriteria, queryParams } = this.normalizeSearchValue(value);
         this.navigateSetQueryParams(queryParams);
         this.currentPage = queryParams.page ?? this.currentPage;
+        this.applyClientFilters();
+        this.paginate();
+        this.cdr.markForCheck();
         if (!hasCriteria) {
           return of(null);
         }
@@ -81,18 +85,18 @@ export class MainCars implements OnInit, OnDestroy {
       const page = Number(params['page'] ?? 1) || 1;
       this.currentPage = page;
       
-      const brand = params['brand'] ?? '';
-      const model = params['model'] ?? '';
-      const minPrice = params['minPrice'] != null ? Number(params['minPrice']) : null;
-      const maxPrice = params['maxPrice'] != null ? Number(params['maxPrice']) : null;
-      this.searchForm.patchValue({ brand, model, minPrice, maxPrice }, { emitEvent: false });
-      
-      this.sortOption = params['sort'] ?? this.sortOption;
-      
-      this.searchForm.patchValue({ sort: this.sortOption }, { emitEvent: false });
+      const formPatch = {
+        search: params['search'] ?? '',
+        minPrice: params['minPrice'] != null ? Number(params['minPrice']) : null,
+        maxPrice: params['maxPrice'] != null ? Number(params['maxPrice']) : null,
+        sort: params['sort'] ?? this.sortOption,
+      };
+      this.sortOption = formPatch.sort;
+      this.searchForm.patchValue(formPatch, { emitEvent: false });
       
       if (this.cars?.length) {
         this.applySort();
+        this.applyClientFilters();
         this.paginate();
         this.cdr.markForCheck();
       }
@@ -104,6 +108,7 @@ export class MainCars implements OnInit, OnDestroy {
         this.getCars();
       } else {
         this.applySort();
+        this.applyClientFilters();
         this.paginate();
         this.cdr.markForCheck();
       }
@@ -139,10 +144,11 @@ export class MainCars implements OnInit, OnDestroy {
     this.carsService.getCars().subscribe({
       next: data => {
         
-        this.cars = (data || []).map((c: any) => ({ ...c, _isImageLoading: !!c?.photo }));
+        this.cars = this.decorateCars(data || []);
         this.hasLoadedCars = true;
         this.applySort();
         this.error = null;
+        this.applyClientFilters();
         this.paginate();
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -161,12 +167,12 @@ export class MainCars implements OnInit, OnDestroy {
   }
 
   clearSearch(): void {
-    this.searchForm.reset({ brand: '', model: '', minPrice: null, maxPrice: null });
+    this.searchForm.reset({ search: '', minPrice: null, maxPrice: null, sort: this.sortOption });
     this.error = null;
     this.isSearching = false;
     
     this.getCars();
-    this.navigateSetQueryParams({ page: 1, brand: null, model: null, minPrice: null, maxPrice: null });
+    this.navigateSetQueryParams({ page: 1, search: null, minPrice: null, maxPrice: null });
   }
 
   
@@ -190,12 +196,13 @@ export class MainCars implements OnInit, OnDestroy {
     
     if (this.sortOption === 'relevance') {
       
-      const queryVal = (this.searchForm?.value?.brand || '') + ' ' + (this.searchForm?.value?.model || '');
+      const queryVal = this.searchForm?.value?.search || '';
       const query = String(queryVal).trim().toLowerCase();
       if (!query || query.length < 1) {
         
         const na = ((a: any) => ((a.brand || '') + ' ' + (a.model || '')).toString().toLowerCase());
         this.cars = (this.cars || []).slice().sort((a: any, b: any) => na(a).localeCompare(na(b)));
+        this.applyClientFilters();
         this.cdr.markForCheck();
         return;
       }
@@ -215,6 +222,7 @@ export class MainCars implements OnInit, OnDestroy {
         const nb = ((b.brand || '') + ' ' + (b.model || '')).toLowerCase();
         return na.localeCompare(nb);
       });
+      this.applyClientFilters();
       return;
     }
     const [field, dir] = (this.sortOption || 'price.asc').split('.');
@@ -233,9 +241,9 @@ export class MainCars implements OnInit, OnDestroy {
       if (na > nb) return 1 * dirVal;
       return 0;
     });
+    this.applyClientFilters();
     this.cdr.markForCheck();
   }
-
   private lcsLength(a: string, b: string): number {
     
     if (!a || !b) return 0;
@@ -259,7 +267,7 @@ export class MainCars implements OnInit, OnDestroy {
     }
     const modalRef = this.modalService.open(AddModCar, {size: 'lg'});
     modalRef.result.then(async (result) => {
-      if (!result) return;
+      if (!result || (result as any)?.save === false) return;
       await this.handleModalResult(result as { save: any; file: File | null; isNew?: boolean; isAdd?: boolean });
     }).catch((error) => {
       console.error('Modal closed with error:', error);
@@ -330,12 +338,13 @@ export class MainCars implements OnInit, OnDestroy {
   }
 
   paginate(): void {
-    // ensure current page is within valid range
-    if (this.currentPage > this.totalPages) this.currentPage = Math.max(this.totalPages, 1);
+    const source = this.filteredCars.length ? this.filteredCars : this.cars;
+    const totalPages = Math.max(Math.ceil((source.length || 0) / this.rowsPerPage), 1);
+    if (this.currentPage > totalPages) this.currentPage = totalPages;
     if (this.currentPage < 1) this.currentPage = 1;
     const start = (this.currentPage - 1) * this.rowsPerPage;
     const end = start + this.rowsPerPage;
-    this.pagedCars = this.cars.slice(start, end);
+    this.pagedCars = source.slice(start, end);
     // no highlightIndex used; center highlighting is via CSS nth-child
   }
 
@@ -371,7 +380,9 @@ export class MainCars implements OnInit, OnDestroy {
   }
 
   get totalPages(): number {
-    return Math.ceil(this.cars.length / this.rowsPerPage);
+    const source = this.filteredCars.length ? this.filteredCars : this.cars;
+    const total = source.length || 0;
+    return Math.max(Math.ceil(total / this.rowsPerPage), 1);
   }
 
   onImgError(event: Event): void {
@@ -381,6 +392,7 @@ export class MainCars implements OnInit, OnDestroy {
 
   onCardImageLoad(car: any): void {
     car._isImageLoading = false;
+    if (car?.id) this.imageLoadCache.set(car.id, false);
     this.cdr.markForCheck();
     setTimeout(() => { try { this.cdr.detectChanges(); } catch(e) {} });
   }
@@ -389,48 +401,60 @@ export class MainCars implements OnInit, OnDestroy {
     const img = event.target as HTMLImageElement;
     img.src = '/missing-image.webp';
     car._isImageLoading = false;
+    if (car?.id) this.imageLoadCache.set(car.id, false);
     this.cdr.markForCheck();
     setTimeout(() => { try { this.cdr.detectChanges(); } catch(e) {} });
   }
 
+  private decorateCars(data: any[]): any[] {
+    if (!Array.isArray(data)) return [];
+    return data.map((car) => ({
+      ...car,
+      _isImageLoading: this.shouldShowImageLoader(car),
+    }));
+  }
+
+  private shouldShowImageLoader(car: any): boolean {
+    if (!car?.photo) return false;
+    if (!car?.id) return true;
+    return this.imageLoadCache.get(car.id) !== false;
+  }
+
   private normalizeSearchValue(value: any): { criteria: any; hasCriteria: boolean; queryParams: any } {
-    const criteria: any = {};
-    const queryParams: any = { page: 1 };
+    const criteria: Record<string, any> = {};
+    const queryParams: Record<string, any> = { page: 1 };
 
-    const brand = value?.brand?.trim() ?? '';
-    const model = value?.model?.trim() ?? '';
-    const minPrice = value?.minPrice;
-    const maxPrice = value?.maxPrice;
+    const searchRaw = typeof value?.[MainCars.SEARCH_CONTROL] === 'string'
+      ? value[MainCars.SEARCH_CONTROL].trim()
+      : '';
+    if (searchRaw.length >= 2) {
+      queryParams[MainCars.SEARCH_CONTROL] = searchRaw;
+      const [brandCandidate, ...rest] = searchRaw.split(/\s+/);
+      if (brandCandidate && brandCandidate.length >= 2) {
+        criteria['brand'] = brandCandidate;
+      }
+      const modelCandidate = rest.join(' ').trim();
+      if (modelCandidate.length >= 2) {
+        criteria['model'] = modelCandidate;
+      }
 
-    if (brand.length >= 2) {
-      criteria.brand = brand;
-      queryParams.brand = brand;
+      if (!criteria['brand'] && !criteria['model']) {
+        criteria['brand'] = searchRaw;
+      }
     } else {
-      queryParams.brand = null;
+      queryParams[MainCars.SEARCH_CONTROL] = null;
     }
 
-    if (model.length >= 2) {
-      criteria.model = model;
-      queryParams.model = model;
-    } else {
-      queryParams.model = null;
-    }
-
-    if (minPrice !== null && minPrice !== undefined && !Number.isNaN(minPrice)) {
-      const normalized = Number(minPrice);
-      criteria.minPrice = normalized;
-      queryParams.minPrice = normalized;
-    } else {
-      queryParams.minPrice = null;
-    }
-
-    if (maxPrice !== null && maxPrice !== undefined && !Number.isNaN(maxPrice)) {
-      const normalized = Number(maxPrice);
-      criteria.maxPrice = normalized;
-      queryParams.maxPrice = normalized;
-    } else {
-      queryParams.maxPrice = null;
-    }
+    MainCars.RANGE_FILTERS.forEach((key) => {
+      const raw = value?.[key];
+      if (raw === null || raw === undefined || Number.isNaN(raw)) {
+        queryParams[key] = null;
+        return;
+      }
+      const normalized = Number(raw);
+      criteria[key] = normalized;
+      queryParams[key] = normalized;
+    });
 
     return { criteria, hasCriteria: Object.keys(criteria).length > 0, queryParams };
   }
@@ -450,7 +474,6 @@ export class MainCars implements OnInit, OnDestroy {
   private handleSearchResponse(res: any): void {
     if (res === null) {
       this.getCars();
-      this.isSearching = false;
       return;
     }
 
@@ -460,22 +483,49 @@ export class MainCars implements OnInit, OnDestroy {
       this.paginate();
       return;
     }
-
-        if (typeof res === 'string') {
+    if (typeof res === 'string') {
       this.cars = [];
       this.error = res;
     } else if (Array.isArray(res) && res.length === 0) {
       this.cars = [];
       this.error = 'Brak wyników';
     } else {
-      this.cars = res as any[];
-          this.hasLoadedCars = true;
+      this.cars = this.decorateCars(res as any[]);
+      this.hasLoadedCars = true;
       this.error = null;
     }
     this.applySort();
+    this.applyClientFilters();
     this.paginate();
     this.cdr.markForCheck();
   }
 
-  
+  private applyClientFilters(): void {
+    const cars = this.cars || [];
+    const formValue = this.searchForm?.value || {};
+    const min = this.toNumberOrNull(formValue?.minPrice);
+    const max = this.toNumberOrNull(formValue?.maxPrice);
+    const hasMin = min !== null;
+    const hasMax = max !== null;
+
+    if (!hasMin && !hasMax) {
+      this.filteredCars = cars.slice();
+      return;
+    }
+
+    this.filteredCars = cars.filter((car) => {
+      const price = Number(car?.price) || 0;
+      if (hasMin && price < (min as number)) return false;
+      if (hasMax && price > (max as number)) return false;
+      return true;
+    });
+  }
+
+  private toNumberOrNull(value: any): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
+  }
 }

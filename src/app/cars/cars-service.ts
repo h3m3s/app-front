@@ -11,6 +11,7 @@ import { CarsModel } from '../../interfaces/car-interface';
 })
 export class CarsService {
   private apiUrl = 'http://localhost:3000/car';
+  private rentApiUrl = 'http://localhost:3000/rent';
   
   public imgBase = 'http://localhost:3000/img';
   private imageVersion = Date.now();
@@ -112,5 +113,22 @@ export class CarsService {
 
     const normalized = trimmed.replace(/^\/+/, '');
     return ensureVersion(`${this.imgBase}/${normalized}`);
+  }
+
+  /* Rentals */
+  getRentalsForCar(carId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.rentApiUrl}/car/${carId}`);
+  }
+
+  addRental(payload: { carId: number; startDate: string; endDate: string }): Observable<any> {
+    return this.http.post(`${this.rentApiUrl}/car/${payload.carId}`, payload);
+  }
+
+  updateRental(rentalId: number, payload: { startDate: string; endDate: string }): Observable<any> {
+    return this.http.patch(`${this.rentApiUrl}/${rentalId}`, payload);
+  }
+
+  deleteRental(rentalId: number): Observable<void> {
+    return this.http.delete<void>(`${this.rentApiUrl}/${rentalId}`);
   }
 }

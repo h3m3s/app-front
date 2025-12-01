@@ -1,50 +1,45 @@
-<button 
-  type="button" 
-  class="add-car-button btn btn-outline-success" 
-  (click)="openModal('add', $event)"
->
-  Add Car
-</button>
-
-<div class="container mt-4">
+<div class="cars-wrapper container-fluid px-4 py-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <h1 class="h4 text-light mb-0">Wyszukaj</h1>
+    <button 
+      type="button" 
+      class="btn btn-outline-success shadow-sm" 
+      (click)="openModal('add', $event)"
+    >
+      Dodaj Samochód
+    </button>
+  </div>
   <div class="row mb-3">
     <div class="col-12">
-      <form [formGroup]="searchForm" class="search-bar" role="search">
-        <div class="row align-items-start g-2">
-        
-          <div class="col-12 col-md-4">
-            <div class="mb-2">
-              <input class="form-control" placeholder="Marka" formControlName="brand">
-            </div>
-            <div>
-              <input class="form-control" placeholder="Model" formControlName="model">
-            </div>
+      <form [formGroup]="searchForm" class="search-bar card bg-dark border border-secondary rounded-3 px-3 py-3 shadow-sm" role="search">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-lg-4">
+            <label class="form-label text-secondary small">Marka / Model</label>
+            <input class="form-control" placeholder="np. Audi A4" formControlName="search">
           </div>
-          
-          <div class="col-12 col-md-3">
-            <div class="mb-2">
-              <input class="form-control" type="number" placeholder="Min cena" formControlName="minPrice">
-            </div>
-            <div>
-              <input class="form-control" type="number" placeholder="Max cena" formControlName="maxPrice">
-            </div>
+          <div class="col-6 col-lg-2">
+            <label class="form-label text-secondary small">Min cena</label>
+            <input class="form-control" type="number" placeholder="Min" formControlName="minPrice">
           </div>
-          
-          <div class="col-12 col-md-5 d-flex align-items-start justify-content-end gap-2">
-            <div class="sort-wrapper d-flex align-items-center">
-              <label class="sort-label me-2">Sortowanie</label>
-              <select class="form-select sort-select" formControlName="sort" name="sortOption">
+          <div class="col-6 col-lg-2">
+            <label class="form-label text-secondary small">Max cena</label>
+            <input class="form-control" type="number" placeholder="Max" formControlName="maxPrice">
+          </div>
+          <div class="col-12 col-lg-4">
+            <label class="form-label text-secondary small">Sortowanie</label>
+            <div class="d-flex flex-column gap-2 flex-sm-row flex-lg-column">
+              <select class="form-select bg-dark text-light border-secondary" formControlName="sort" name="sortOption">
                 <option value="relevance">Od najtrafniejszych</option>
                 <option value="name.asc">Nazwa: A-Z</option>
                 <option value="name.desc">Nazwa: Z-A</option>
                 <option value="price.asc">Cena: od najtańszych</option>
                 <option value="price.desc">Cena: od najdroższych</option>
               </select>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-outline-secondary" type="button" (click)="clearSearch()">Wyczyść</button>
-              <div class="search-spinner ms-2" *ngIf="isSearching" role="status">
-                <span class="spinner-border spinner-border-sm text-light"></span>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-secondary flex-grow-1" type="button" (click)="clearSearch()">Wyczyść</button>
+                <div class="search-spinner" *ngIf="isSearching" role="status">
+                  <span class="spinner-border spinner-border-sm text-light"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -75,7 +70,7 @@
             </div>
             <div class="card-body">
             <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-            <p class="card-text">Cena: <b>{{ car.price }} zł/h</b></p>
+            <p class="card-text">Cena: <b>{{ car.price }} zł/12h</b></p>
           </div>
           <div class="card-footer d-flex justify-content-center">
             <button class="btn btn-outline-secondary w-100">
@@ -91,7 +86,7 @@
 
 @if (totalPages > 1) {
   <nav class="mt-4">
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center flex-wrap">
 
       
       <li class="page-item" [class.disabled]="currentPage === 1">
