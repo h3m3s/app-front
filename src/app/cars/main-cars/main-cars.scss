@@ -1,24 +1,22 @@
-/* --- GLOBAL --- */
+ 
 button {
   margin-right: 12px;
 }
 
-/* ============================= */
-/* ========== DESKTOP ========== */
-/* ============================= */
+ 
 
 .add-car-button {
   position: absolute;
-  top: 10%;
-  right: 12%;
-  z-index: 10;
+  top: 1%;
+  right: 8%;
+  z-index: 50; 
 }
 
 .container {
   position: absolute;
   left: 10%;
   width: 80%;
-  height: 80%;
+  height: 78%;
   padding: 20px 10px 10px 30px;
 
   display: flex;
@@ -27,29 +25,207 @@ button {
 
   overflow-y: auto;
   overflow-x: hidden;
+  padding-bottom: 110px; 
+
+  
+  scrollbar-color: var(--thumb) var(--track);
+  scrollbar-width: thin;
 }
 
-.card {
-  cursor: pointer;
-  background-color: #1d1d1d;
-  border: 1px solid white;
-  color: white;
+ 
+.search-bar {
+  padding: 6px 4px; 
+}
+.search-bar .row { align-items: center; }
+.search-bar .form-control { min-width: 120px; width: 100%; }
+
+.search-bar .sort-wrapper { margin-right: 12px; }
+
+ 
+.search-bar input.form-control,
+.search-bar .form-select,
+.sort-bar .form-select {
+  background-color: var(--panel);
+  border: 1px solid #2a2a2a;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+
+ 
+.sort-wrapper {
+  display: inline-block;
+  background: var(--panel);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.sort-wrapper .sort-label {
+  display: block;
+  color: #bdbdbd;
+}
+.sort-wrapper .sort-select {
+  background: var(--panel);
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 6px 8px;
+  min-width: 160px;
+  height: 36px;
+  font-size: 0.95rem;
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px; 
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23bdbdbd' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+.sort-wrapper .sort-select:focus { box-shadow: 0 6px 18px rgba(43,159,255,0.12); border-color: var(--accent); outline: none; }
+@media (max-width: 768px) {
+  .sort-wrapper { width: 100%; }
+  .search-bar .col-12.col-md-4, .search-bar .col-12.col-md-3, .search-bar .col-12.col-md-5 { width: 100%; }
+  .card { min-height: 260px; }
+} 
+.search-bar input.form-control::placeholder {
+  color: #bfbfbf;
+}
+  .card { min-height: 260px; }
+.search-bar input.form-control:focus,
+.search-bar .form-select:focus,
+.sort-bar .form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 6px 14px rgba(43,159,255,0.12);
+}
+.search-bar .btn, .sort-bar .btn {
+  padding: 10px 14px;
+}
+
+.search-spinner { display: flex; align-items:center; }
+
+.container::-webkit-scrollbar {
+  width: 12px;
+}
+.container::-webkit-scrollbar-track {
+  background: var(--track);
+  border-radius: 8px;
+}
+.container::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--thumb), var(--thumb-hover));
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+.container::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+  .card {
+    cursor: pointer;
+    background-color: var(--bg);
+    border: 1px solid #2f2f2f;
+    color: #fff;
   transition: background-color .2s;
+  min-height: 300px; 
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .card:hover {
   background-color: rgba(73, 73, 73, 0.266);
 }
 
-.card-footer {
-  border-top: 1px solid white;
+  .card-footer {
+    border-top: 1px solid #2a2a2a;
+  margin-top: auto; 
+}
+
+ 
+  .card-img-top {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3; /* popular 4:3 aspect ratio */
+    object-fit: cover;
+    display: block;
+  }
+
+.image-wrapper {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+  .card-body {
+    height: 60px; /* reduced so image occupies more space */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    font-size: 0.92rem;
+  }
+ 
+  .card-body h5 {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 1.02rem;
+  }
+
+.card-footer button {
+  width: 100%;
+}
+
+/* Highlight the center card */
+/* Highlight the center card in every row (for a 3-column layout on md and above) */
+@media (min-width: 768px) {
+  .row .col .card {
+    transition: none; /* avoid overlap */
+    box-shadow: none;
+  }
+  /* side cards - slightly smaller */
+  .row .col:nth-child(3n+1) .card,
+  .row .col:nth-child(3n+3) .card {
+    transform: none; 
+    filter: contrast(0.95); 
+  }
+  /* middle card - make it stand out */
+  .row .col:nth-child(3n+2) .card {
+    border: 2px solid #2b9fff;
+    box-shadow: 0 12px 30px rgba(43,159,255,0.18);
+    transform: none; /* avoid overlap */
+    z-index: 2;
+  }
+  /* slightly increase the middle card image height */
+  .row .col:nth-child(3n+2) .card .card-img-top {
+    aspect-ratio: 16 / 9; /* center card gets a slightly wider format */
+    transform: scale(1.03);
+  }
+  /* default behavior relies on aspect-ratio for non-center cards */
 }
 
 nav {
-    position: absolute;
-    top: 88%;
-    left: 40%;
-
+  position: absolute;
+  top: 40px;
+  right: 180px;
+  z-index: 100; /* ensure pagination is above cards */
+  display: flex;
+  justify-content: center;
 }
 
 /* ---------------- PAGINATION COLORS ---------------- */
@@ -99,8 +275,9 @@ nav {
   }
 
   nav {
-    top: 90%;
-    left: 35%;
+    position: relative;
+    margin-top: 12px;
+    left: 0;
   }
 }
 
@@ -126,6 +303,21 @@ nav {
     padding: 10px;
     height: auto;
     overflow-y: visible;
+  }
+  /* ensure search inputs are stacked and full width on small devices */
+  .search-bar, .sort-bar {
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-bar input, .search-bar .form-select, .search-bar .btn, .sort-bar .form-select, .sort-bar .btn {
+    width: 100%;
+  }
+  .card { min-height: 280px; }
+  /* add extra top spacing for inputs on small screens so inputs are lower */
+  .search-bar, .sort-bar {
+    margin-top: 18px;
+    padding-top: 6px;
   }
 
   nav {
@@ -159,29 +351,32 @@ nav {
 /* ============================= */
 
 @media (max-width: 480px) {
-
   .add-car-button {
     width: 100%;
     margin-top: 5px;
   }
-
   .container {
-    padding: 5px;
+    padding: 3px;
   }
-
+  .card-body {
+    padding: 4px 6px;
+    font-size: 0.88rem;
+  }
   .card-body h5 {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
   }
-
   .card-body p {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
   }
-
   .card-footer button {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
-
-  /* absolutne zabezpieczenie przed poziomowym scrollem */
+  /* Subtle center card highlight on mobile */
+  .row .col:nth-child(3n+2) .card {
+    border-width: 1.2px;
+    box-shadow: 0 4px 10px rgba(43,159,255,0.10);
+  }
   body, html {
     overflow-x: hidden !important;
   }

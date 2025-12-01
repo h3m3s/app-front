@@ -6,7 +6,8 @@ import { ViewCar } from './view-car/view-car';
 import { AppRoutingModule } from '../app-routing-module';
 import { RouterModule } from '@angular/router';
 import { AddModCar } from './add-mod-car/add-mod-car';
-import { FormsModule } from '@angular/forms';
+import { ImageCropperModalComponent } from './add-mod-car/image-cropper-modal.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -16,7 +17,9 @@ import { FormsModule } from '@angular/forms';
     HttpClientModule,
     AppRoutingModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    ImageCropperModalComponent
   ],
   exports:[
     MainCars

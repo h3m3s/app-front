@@ -1,29 +1,44 @@
 
-<button type="button" class="btn btn-outline-primary go-back-btn" routerLink="/main-cars"> Zamknij</button>
+<button type="button" class="btn btn-outline-primary go-back-btn" [routerLink]="['/main-cars']" [queryParams]="{ page: returnPage }"> Zamknij</button>
 <div class="container mt-4">
+  <div *ngIf="isLoading" class="full-spinner-overlay">
+    <div class="spinner-border text-light" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
   <div class="card" >
-      <div class="row">Marka <span>{{car?.brand}}</span></div>
-      <div class="row">Model <span>{{car?.model}}</span></div>
-      <div class="row">Cena <span>{{car?.price}}zł/h</span></div>
-      <div class="row">Identyfikator Pojazdu <span>#{{car?.id}}</span></div>
+    <div *ngIf="isLoading" class="spinner-overlay">
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+      <div [class.opacity-50]="isLoading">Marka: <b>{{car?.brand}}</b></div>
+      <div [class.opacity-50]="isLoading">Model: <b>{{car?.model}}</b></div>
+      <div [class.opacity-50]="isLoading">Cena: <b>{{car?.price}} zł/h</b></div>
+      <div [class.opacity-50]="isLoading">Identyfikator Pojazdu: <b>#{{car?.id}}</b></div>
       <div class="menage-buttons">
-        <button class="btn btn-outline-warning" (click)="openModal('mod', $event,  car)">Modyfikuj</button>
+        <button class="btn btn-outline-warning" (click)="openModal('modify', $event,  car)">Modyfikuj</button>
         <button class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button>
       </div>
   </div>
   <div class="card image position-relative">
-      <div *ngIf="isLoadingImage" class="spinner-overlay">
-        <div class="spinner-border text-light" role="status">
-          <span class="visually-hidden">Loading...</span>
+      <div class="image-wrapper position-relative">
+        <div *ngIf="isLoadingImage" class="spinner-overlay">
+          <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
-      </div>
 
-      <img 
-        [src]="car?.photo? '/img/' + car.photo : '/missing-image.webp'" 
-        alt="Car image"
-        class="img-fluid"
-        (load)="onImageLoad()"
-        (error)="onImageError($event)"
-        [class.d-none]="isLoadingImage">
+        <img 
+          [src]="carsService.getImageUrl(car?.photo)" 
+          alt="Car image"
+          class="img-fluid"
+          style="width: 100%; height: 100%; object-fit: cover; background: #181818;"
+          loading="lazy"
+          decoding="async"
+          (load)="onImageLoad()"
+          (error)="onImageError($event)"
+          [class.invisible]="isLoadingImage">
+      </div>
   </div>
 </div>

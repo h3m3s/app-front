@@ -1,28 +1,44 @@
-<form #carForm="ngForm" (ngSubmit)="onSave()">
+<form [formGroup]="form" (ngSubmit)="onSave()">
+    <p>* - Pola Obowiązkowe</p>
     <div>
-        <label for="brand" class="form-label">Podaj Markę</label>
-        <input name="brand" [(ngModel)]="carInputForm.brand" class="form-control" id="brand">
+        <label for="brand" class="form-label">Podaj Markę*</label>
+        <input formControlName="brand" class="form-control" id="brand" required maxlength="20" pattern="^[A-Ź\s]{3,20}$" [ngClass]="{'is-invalid': form.get('brand')?.invalid && (form.get('brand')?.dirty || form.get('brand')?.touched)}">
+        
     </div>
     <div>
-        <label for="model" class="form-label">Podaj Model</label>
-        <input name="model" [(ngModel)]="carInputForm.model" class="form-control" id="model">
+        <label for="model" class="form-label">Podaj Model*</label>
+        <input formControlName="model" class="form-control" id="model" required maxlength="20" pattern="^[A-Ź\s0-9\-_]{1,20}$" autocomplete="off" [ngClass]="{'is-invalid': form.get('model')?.invalid && (form.get('model')?.dirty || form.get('model')?.touched)}">
     </div>
     <div>
         <label for="price" class="form-label" >Podaj Podaj Cene</label>
-        <input name="price" [(ngModel)]="carInputForm.price" class="form-control" id="price">
+        <input formControlName="price" class="form-control" required id="price" maxlength="20" pattern="^[0-9]{1,3}$" min="5" [ngClass]="{'is-invalid': form.get('price')?.invalid && (form.get('price')?.dirty || form.get('price')?.touched)}">
     </div>
     <div>
        <label for="photo" class="form-label">Wybierz Zdjęcie</label>
        <input
             type="file"
             id="photo"
-            class="form-control"
+            class="form-control file-input"
             accept=".webp,.jpg,.jpeg,.png"
             (change)="onFileSelected($event)"
         >
     <div *ngIf="fileError" class="text-danger mt-1">{{ fileError }}</div>
-    <img *ngIf="previewDataUrl" [src]="previewDataUrl" alt="preview" class="img-thumbnail mt-2" style="max-width:200px;">
+        <img *ngIf="previewDataUrl" [src]="previewDataUrl" alt="preview" class="img-thumbnail mt-2" style="max-width:200px;">
+        <ng-container *ngIf="showCropper">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal d-block" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <app-image-cropper-modal
+                            [imageSrc]="previewDataUrl"
+                            (cropped)="onCropped($event)"
+                            (cancelled)="closeCropper()">
+                        </app-image-cropper-modal>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
     </div>
     <button class="btn btn-outline-secondary" type="reset" (click)="onClose()">Wyjdź</button>
-    <button class="btn btn-outline-success">Potwierdź</button>
+    <button class="btn btn-outline-success" [disabled]="form.invalid">Potwierdź</button>
 </form>

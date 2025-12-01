@@ -1,7 +1,63 @@
 form{
     padding: 30px;
+    background: linear-gradient(180deg, #1f1f1f, #191919);
+    border-radius: 8px;
+    color: #fff;
 }
 .btn{
     margin-top: 20px;
     margin-right: 20px;
+}
+.error{
+    color: red;
+    font-size: 14px;
+    margin-bottom: 0px;
+    display: none;
+}
+.error.active{
+    display: block;
+}
+
+ 
+input.form-control, select.form-select {
+    background-color: #121212;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+label.form-label, p {
+    color: #fff;
+}
+.file-input {
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: #fff;
+    cursor: pointer;
+}
+.file-input::file-selector-button,
+.file-input::-webkit-file-upload-button {
+    background-color: #343434;
+    border: 1px solid #4a4a4a;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.file-input::file-selector-button:hover,
+.file-input::-webkit-file-upload-button:hover {
+    background-color: #3f3f3f;
+    border-color: var(--accent);
+}
+input.form-control:focus, select.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 8px 16px rgba(43,159,255,0.12);
+    outline: none;
+}
+
+@media (max-width: 600px) {
+    form{ padding: 16px; }
+    input.form-control, select.form-select { padding: 12px; }
 }
