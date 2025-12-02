@@ -8,8 +8,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { SharedModule } from './shared/shared-module';
 import { Header } from './shared/header/header';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
     App
@@ -21,12 +20,13 @@ import { FormsModule } from '@angular/forms';
     RouterLink,
     SharedModule,
     FormsModule,
+    ReactiveFormsModule,
     CarsModule,
     NgbModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient()
+    provideHttpClient(),
   ],
   bootstrap: [App]
 })

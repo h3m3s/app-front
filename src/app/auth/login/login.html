@@ -1,0 +1,30 @@
+<div class="login-wrapper d-flex flex-column align-items-center justify-content-center py-4">
+	<div class="login-card card shadow-sm">
+		<h2 class="h5 mb-3 text-center">Logowanie</h2>
+		<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+			<div class="mb-3">
+				<label class="form-label small text-secondary">Email lub nazwa użytkownika</label>
+				<input type="text" formControlName="usernameOrEmail" class="form-control" [class.is-invalid]="fieldInvalid('usernameOrEmail')" placeholder="np. jan.kowalski" autocomplete="username" />
+				<div class="invalid-feedback" *ngIf="fieldInvalid('usernameOrEmail')">
+					Wpisz min. 3 znaki.
+				</div>
+			</div>
+			<div class="mb-3">
+				<label class="form-label small text-secondary">Hasło</label>
+				<input type="password" formControlName="password" class="form-control" [class.is-invalid]="fieldInvalid('password')" placeholder="••••••" autocomplete="current-password" />
+				<div class="invalid-feedback" *ngIf="fieldInvalid('password')">
+					Min. 6 znaków.
+				</div>
+			</div>
+			<div class="form-check mb-3">
+				<input class="form-check-input" type="checkbox" id="remember" formControlName="remember" />
+				<label class="form-check-label" for="remember">Zapamiętaj mnie</label>
+			</div>
+			<button class="btn btn-primary w-100 mb-2" type="submit" [disabled]="isSubmitting || form.invalid">
+				<span *ngIf="!isSubmitting">Zaloguj</span>
+				<span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+			</button>
+			<div *ngIf="error" class="alert alert-danger py-2 px-3 mb-0 small">{{ error }}</div>
+		</form>
+	</div>
+</div>
