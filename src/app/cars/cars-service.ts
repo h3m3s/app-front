@@ -53,7 +53,12 @@ export class CarsService {
     );
   }
   
-  searchCars(criteria: Partial<CarsModel> & { minPrice?: number; maxPrice?: number }): Observable<CarsModel[] | string> {
+  searchCars(criteria: Partial<CarsModel> & {
+    minPrice?: number;
+    maxPrice?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Observable<CarsModel[] | string> {
     const url = `${this.apiUrl}/search`;
     
     return this.http.post(url, criteria, { responseType: 'text' as 'json' }).pipe(

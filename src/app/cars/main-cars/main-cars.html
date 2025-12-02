@@ -44,6 +44,28 @@
             </div>
           </div>
         </div>
+        <div class="row g-3 align-items-end mt-1">
+          <div class="col-12 col-md-3">
+            <label class="form-label text-secondary small">Od dnia</label>
+                 <input type="date" class="form-control" formControlName="startDate"
+                   (change)="searchForm.patchValue({ endDate: (searchForm.value.endDate && searchForm.value.endDate < searchForm.value.startDate) ? searchForm.value.startDate : searchForm.value.endDate })">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label text-secondary small">Od godziny</label>
+                 <input type="time" class="form-control" formControlName="startTime"
+                   (change)="onStartTimeChange()">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label text-secondary small">Do dnia</label>
+                 <input type="date" class="form-control" formControlName="endDate"
+                   [min]="searchForm.value.startDate || null">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label text-secondary small">Do godziny</label>
+                 <input type="time" class="form-control" formControlName="endTime"
+                   [min]="(searchForm.value.startDate && searchForm.value.endDate === searchForm.value.startDate) ? (searchForm.value.startTime || '00:00') : null">
+          </div>
+        </div>
       </form>
     </div>
   </div>
@@ -58,7 +80,7 @@
 
     @for (car of pagedCars; let i = $index; track car.id) {
       <div class="col">
-          <div class="card h-100" [routerLink]="['/view-car', car.id]" [queryParams]="{ page: currentPage }">
+          <div class="card" [routerLink]="['/view-car', car.id]" [queryParams]="{ page: currentPage }">
             <div class="image-wrapper position-relative">
               <div *ngIf="car._isImageLoading" class="spinner-overlay d-flex align-items-center justify-content-center">
                 <div class="spinner-border text-light" role="status">
@@ -67,6 +89,8 @@
               </div>
               
               <img [src]="carsService.getImageUrl(car.photo)" alt="Car image" class="card-img-top" (load)="onCardImageLoad(car)" (error)="onCardImageError(car, $event)" loading="lazy" decoding="async" [class.invisible]="car._isImageLoading">
+              
+              <div *ngIf="car.isReserved" class="reserved-badge">Zarezerwowane</div>
             </div>
             <div class="card-body">
             <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>

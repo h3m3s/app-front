@@ -143,7 +143,10 @@ export class ViewCar implements OnDestroy {
       return;
     }
 
-    if (new Date(startIso) > new Date(endIso)) {
+    // Enforce start <= end, including same-day time ordering
+    const startTs = new Date(startIso).getTime();
+    const endTs = new Date(endIso).getTime();
+    if (startTs > endTs) {
       this.rentError = 'Data zakończenia nie może być wcześniejsza niż rozpoczęcia.';
       return;
     }
@@ -167,6 +170,15 @@ export class ViewCar implements OnDestroy {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  // Ensure end time is not earlier than start time on same-day selection
+  onRentStartTimeChange(): void {
+    const val = this.rentForm.value;
+    const sameDay = !!val.startDate && val.endDate === val.startDate;
+    if (sameDay && val.endTime && val.startTime && val.endTime < val.startTime) {
+      this.rentForm.patchValue({ endTime: val.startTime });
+    }
   }
 
   protected deleteRental(rent: any): void {
@@ -210,7 +222,7 @@ export class ViewCar implements OnDestroy {
     if (!date || !time) {
       return '';
     }
-    return `${date}T${time}`;
+    return `${date}T${time}:00.000Z`;
   }
 
   onImageLoad() {

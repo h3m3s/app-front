@@ -70,19 +70,23 @@
     <form class="rent-form row g-3 mt-2" [formGroup]="rentForm" (ngSubmit)="saveRental()">
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Data rozpoczęcia</label>
-        <input type="date" class="form-control" formControlName="startDate">
+         <input type="date" class="form-control" formControlName="startDate"
+           (change)="rentForm.patchValue({ endDate: (rentForm.value.endDate && rentForm.value.endDate < rentForm.value.startDate) ? rentForm.value.startDate : rentForm.value.endDate })">
       </div>
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Godzina rozpoczęcia</label>
-        <input type="time" class="form-control" formControlName="startTime">
+         <input type="time" class="form-control" formControlName="startTime"
+           (change)="onRentStartTimeChange()">
       </div>
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Data zakończenia</label>
-        <input type="date" class="form-control" formControlName="endDate">
+         <input type="date" class="form-control" formControlName="endDate"
+           [min]="rentForm.value.startDate || null">
       </div>
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Godzina zakończenia</label>
-        <input type="time" class="form-control" formControlName="endTime">
+         <input type="time" class="form-control" formControlName="endTime"
+           [min]="(rentForm.value.startDate && rentForm.value.endDate === rentForm.value.startDate) ? (rentForm.value.startTime || '00:00') : null">
       </div>
       <div class="col-12 d-flex flex-wrap align-items-end gap-2">
         <button class="btn btn-success flex-grow-1" type="submit" [disabled]="isRentSaving">

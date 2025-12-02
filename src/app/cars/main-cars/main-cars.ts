@@ -55,7 +55,25 @@ export class MainCars implements OnInit, OnDestroy {
       search: [''],
       minPrice: [null],
       maxPrice: [null],
+      startDate: [''],
+      startTime: [''],
+      endDate: [''],
+      endTime: [''],
       sort: [this.sortOption]
+    });
+
+    // Basic date/time cross-field validation: start <= end
+    this.searchForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val) => {
+      const startIso = this.combineDateTime(val?.startDate, val?.startTime, 'start');
+      const endIso = this.combineDateTime(val?.endDate, val?.endTime, 'end');
+      const hasBoth = !!(startIso && endIso);
+      const isOrderValid = !hasBoth || (new Date(startIso!).getTime() <= new Date(endIso!).getTime());
+      const errors: Record<string, any> = {};
+      if (hasBoth && !isOrderValid) {
+        errors['dateOrder'] = 'Data końcowa musi być późniejsza lub równa początkowej';
+      }
+      // set a form-level error for easier UI checks
+      this.searchForm.setErrors(Object.keys(errors).length ? errors : null);
     });
 
     this.searchForm.valueChanges.pipe(
@@ -68,6 +86,10 @@ export class MainCars implements OnInit, OnDestroy {
         this.applyClientFilters();
         this.paginate();
         this.cdr.markForCheck();
+        // Block search if date order invalid
+        if (this.searchForm.errors?.['dateOrder']) {
+          return of(null);
+        }
         if (!hasCriteria) {
           return of(null);
         }
@@ -85,10 +107,16 @@ export class MainCars implements OnInit, OnDestroy {
       const page = Number(params['page'] ?? 1) || 1;
       this.currentPage = page;
       
+      const startParts = this.splitDateTime(params['startDate']);
+      const endParts = this.splitDateTime(params['endDate']);
       const formPatch = {
         search: params['search'] ?? '',
         minPrice: params['minPrice'] != null ? Number(params['minPrice']) : null,
         maxPrice: params['maxPrice'] != null ? Number(params['maxPrice']) : null,
+        startDate: startParts.date,
+        startTime: startParts.time,
+        endDate: endParts.date,
+        endTime: endParts.time,
         sort: params['sort'] ?? this.sortOption,
       };
       this.sortOption = formPatch.sort;
@@ -129,10 +157,23 @@ export class MainCars implements OnInit, OnDestroy {
       .pipe(filter((ev: any) => ev instanceof NavigationEnd), takeUntil(this.destroy$))
       .subscribe(() => {
         if (this.router.url.includes('/main-cars')) {
-          this.carsService.refreshCarsCache();
-          this.getCars();
+          // Avoid overwriting active search results with the full list.
+          const { hasCriteria } = this.normalizeSearchValue(this.searchForm.value);
+          if (!hasCriteria) {
+            this.carsService.refreshCarsCache();
+            this.getCars();
+          }
         }
       });
+  }
+
+  // Ensure end time adjusts when same-day and earlier than start time
+  onStartTimeChange(): void {
+    const val = this.searchForm.value;
+    const sameDay = !!val.startDate && val.endDate === val.startDate;
+    if (sameDay && val.endTime && val.startTime && val.endTime < val.startTime) {
+      this.searchForm.patchValue({ endTime: val.startTime }, { emitEvent: true });
+    }
   }
 
   ngOnDestroy(): void {
@@ -167,12 +208,28 @@ export class MainCars implements OnInit, OnDestroy {
   }
 
   clearSearch(): void {
-    this.searchForm.reset({ search: '', minPrice: null, maxPrice: null, sort: this.sortOption });
+    this.searchForm.reset({
+      search: '',
+      minPrice: null,
+      maxPrice: null,
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+      sort: this.sortOption,
+    });
     this.error = null;
     this.isSearching = false;
     
     this.getCars();
-    this.navigateSetQueryParams({ page: 1, search: null, minPrice: null, maxPrice: null });
+    this.navigateSetQueryParams({
+      page: 1,
+      search: null,
+      minPrice: null,
+      maxPrice: null,
+      startDate: null,
+      endDate: null,
+    });
   }
 
   
@@ -353,6 +410,11 @@ export class MainCars implements OnInit, OnDestroy {
     this.paginate();
     // update URL query params so back navigation/navigations preserve page
     this.navigateSetQueryParams({ page: this.currentPage });
+    // Scroll to search bar
+    const searchBar = document.querySelector('.search-bar');
+    if (searchBar) {
+      searchBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   private navigateSetQueryParams(queryParams: any) {
@@ -445,6 +507,18 @@ export class MainCars implements OnInit, OnDestroy {
       queryParams[MainCars.SEARCH_CONTROL] = null;
     }
 
+    const startIso = this.combineDateTime(value?.startDate, value?.startTime, 'start');
+    const endIso = this.combineDateTime(value?.endDate, value?.endTime, 'end');
+    if (startIso && endIso && new Date(startIso) <= new Date(endIso)) {
+      criteria['startDate'] = startIso;
+      criteria['endDate'] = endIso;
+      queryParams['startDate'] = startIso;
+      queryParams['endDate'] = endIso;
+    } else {
+      queryParams['startDate'] = null;
+      queryParams['endDate'] = null;
+    }
+
     MainCars.RANGE_FILTERS.forEach((key) => {
       const raw = value?.[key];
       if (raw === null || raw === undefined || Number.isNaN(raw)) {
@@ -527,5 +601,24 @@ export class MainCars implements OnInit, OnDestroy {
     }
     const num = Number(value);
     return Number.isNaN(num) ? null : num;
+  }
+
+  private combineDateTime(date?: string | null, time?: string | null, kind: 'start' | 'end' = 'start'): string | null {
+    if (!date) {
+      return null;
+    }
+    const normalizedTime = (time && time.trim().length ? time : kind === 'end' ? '23:59' : '00:00');
+    return `${date}T${normalizedTime}:00.000Z`;
+  }
+
+  private splitDateTime(value?: string | null): { date: string; time: string } {
+    if (!value) {
+      return { date: '', time: '' };
+    }
+    const normalized = value.replace(' ', 'T');
+    return {
+      date: normalized.substring(0, 10),
+      time: normalized.substring(11, 16) || '',
+    };
   }
 }
