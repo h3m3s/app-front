@@ -24,6 +24,7 @@
 				<span *ngIf="!isSubmitting">Zaloguj</span>
 				<span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
 			</button>
+			<a class="btn btn-outline-secondary w-100" [routerLink]="['/register']">Przejdź do rejestracji</a>
 			<div *ngIf="error" class="alert alert-danger py-2 px-3 mb-0 small">{{ error }}</div>
 		</form>
 	</div>

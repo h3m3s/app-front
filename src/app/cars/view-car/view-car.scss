@@ -1,3 +1,6 @@
+.goBackButtonContainer {
+    justify-content: flex-end;
+}
 .car-image-auto {
     width: 100%;
     height: auto;
@@ -6,12 +9,6 @@
     display: block;
     max-height: 100%;
 }
-.go-back-btn{
-    position: absolute;
-    top: 20px;
-    right: 40px;
-}
- 
 .container {
     display: flex;
     flex-direction: row;
@@ -49,7 +46,7 @@
         border: 1px solid #343434;
         padding: 8px 12px;
         width: 38%;
-        min-height: 320px;
+        min-height: 100px;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -137,6 +134,27 @@
  .text-muted {
     color: #aaa !important;
  }
+
+.user-modal {
+    max-height: 60vh;
+    overflow: auto;
+}
+.user-modal .json-pre {
+    background: #0f1720;
+    color: #e6eef8;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+}
+.rent-form select.form-select {
+    background-color: #131b26;
+    color: #fff;
+    border: 1px solid #2f3a4c;
+}
+.rent-form .btn-outline-primary {
+    border-color: rgba(255,255,255,0.08);
+}
  
 
  
@@ -156,8 +174,9 @@
         font-size: 0.92rem;
     }
     .card.image {
-        height: 260px;
+        height: 460px;
     }
+
 }
 
  

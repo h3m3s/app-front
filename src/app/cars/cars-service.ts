@@ -5,6 +5,7 @@ import { shareReplay, switchMap, startWith } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { CarsModule } from './cars-module';
 import { CarsModel } from '../../interfaces/car-interface';
+import { AuthService } from '../auth/auth-service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,10 +13,11 @@ import { CarsModel } from '../../interfaces/car-interface';
 export class CarsService {
   private apiUrl = 'http://localhost:3000/car';
   private rentApiUrl = 'http://localhost:3000/rent';
+  private authApiUrl = 'http://localhost:3000/auth';
   
   public imgBase = 'http://localhost:3000/img';
   private imageVersion = Date.now();
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
   private _refreshCars$ = new Subject<void>();
   private cachedCars$: Observable<CarsModel[]> | null = null;
@@ -125,8 +127,19 @@ export class CarsService {
     return this.http.get<any[]>(`${this.rentApiUrl}/car/${carId}`);
   }
 
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.authApiUrl}/users`);
+  }
+
+  getUser(id: number): Observable<any> {
+    return this.http.get<any>(`${this.authApiUrl}/user/${id}`);
+  }
+
   addRental(payload: { carId: number; startDate: string; endDate: string }): Observable<any> {
-    return this.http.post(`${this.rentApiUrl}/car/${payload.carId}`, payload);
+    const body: any = { startDate: payload.startDate, endDate: payload.endDate };
+    const user = this.auth.currentUser;
+    if (user && user.id) body.userId = user.id;
+    return this.http.post(`${this.rentApiUrl}/car/${payload.carId}`, body);
   }
 
   updateRental(rentalId: number, payload: { startDate: string; endDate: string }): Observable<any> {

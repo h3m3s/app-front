@@ -1,5 +1,7 @@
 
-<button type="button" class="btn btn-outline-primary go-back-btn" [routerLink]="['/main-cars']" [queryParams]="{ page: returnPage }"> Zamknij</button>
+<div class="container mt-2 display-flex goBackButtonContainer">
+  <button type="button" class="btn btn-outline-primary go-back-btn" [routerLink]="['/main-cars']" [queryParams]="{ page: returnPage }">Zamknij</button>
+</div>
 <div class="container mt-4 flex-wrap">
   <div *ngIf="isLoading" class="full-spinner-overlay">
     <div class="spinner-border text-light" role="status">
@@ -17,8 +19,8 @@
       <div [class.opacity-50]="isLoading">Cena: <b>{{car?.price}} zł/12h</b></div>
       <div [class.opacity-50]="isLoading">Identyfikator Pojazdu: <b>#{{car?.id}}</b></div>
       <div class="menage-buttons">
-        <button class="btn btn-outline-warning" (click)="openModal('modify', $event,  car)">Modyfikuj</button>
-        <button class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button>
+        <button *ngIf="auth.isPermitted()" class="btn btn-outline-warning" (click)="openModal('modify', $event,  car)">Modyfikuj</button>
+        <button *ngIf="auth.isPermitted()" class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button>
       </div>
   </div>
   <div class="card image position-relative">
@@ -43,11 +45,8 @@
   </div>
 
   <div class="card rentals">
-    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex justify-content-between align-items-center mb-2">
       <h5 class="mb-0">Terminy wypożyczeń</h5>
-      <button class="btn btn-outline-light btn-sm" type="button" (click)="startAddRental()">
-        {{ editingRental ? 'Nowy termin' : 'Dodaj termin' }}
-      </button>
     </div>
 
     <div *ngIf="rentalsLoading" class="text-muted small">Ładowanie terminów...</div>
@@ -61,13 +60,46 @@
           </div>
         </div>
         <div class="btn-group btn-group-sm">
-          <button class="btn btn-outline-warning" (click)="editRental(rent)">Edytuj</button>
-          <button class="btn btn-outline-danger" (click)="deleteRental(rent)">Usuń</button>
+          <button *ngIf="auth.isPermitted()" class="btn btn-outline-warning" (click)="editRental(rent)">Edytuj</button>
+          <button *ngIf="auth.isPermitted()" class="btn btn-outline-danger" (click)="deleteRental(rent)">Usuń</button>
         </div>
       </div>
     </div>
 
     <form class="rent-form row g-3 mt-2" [formGroup]="rentForm" (ngSubmit)="saveRental()">
+      <div class="col-12" *ngIf="auth.isPermitted()">
+        <label class="form-label text-secondary small">Przypisz użytkownika (admin)</label>
+        <div class="d-flex gap-2 align-items-end">
+          <select class="form-select flex-grow-1" [disabled]="usersLoading" (change)="selectedUserId = $any($event.target).value">
+            <option value="">-- wybierz użytkownika --</option>
+            <option *ngFor="let u of users" [value]="u.id">{{ u.username || u.user || u.email }}</option>
+          </select>
+          <button type="button" class="btn btn-outline-primary" (click)="loadSelectedUser()" [disabled]="!selectedUserId">Załaduj</button>
+          <div *ngIf="loadedUser" class="small text-muted ms-3">Wybrano: <b>{{ loadedUser.username || loadedUser.user || loadedUser.email }}</b></div>
+        </div>
+      </div>
+
+      <!-- User details modal (admin) -->
+      <ng-template #userModal let-modal>
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">Szczegóły użytkownika</h5>
+          <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="modal.dismiss()"></button>
+        </div>
+        <div class="modal-body bg-light text-dark user-modal">
+          <div *ngIf="loadedUserSafe; else noUser">
+            <div class="mb-2"><strong>ID:</strong> {{ loadedUserSafe.id }}</div>
+            <div class="mb-2"><strong>Login:</strong> {{ loadedUserSafe.username || loadedUserSafe.user }}</div>
+            <div class="mb-2"><strong>Email:</strong> {{ loadedUserSafe.email }}</div>
+            <div class="mb-2"><strong>Uprawnienia:</strong> {{ loadedUserSafe.isPermitted ? 'Admin' : 'Użytkownik' }}</div>
+          </div>
+          <ng-template #noUser>
+            <div class="text-muted">Brak danych użytkownika.</div>
+          </ng-template>
+        </div>
+        <div class="modal-footer bg-dark">
+          <button type="button" class="btn btn-secondary" (click)="modal.close()">Zamknij</button>
+        </div>
+      </ng-template>
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Data rozpoczęcia</label>
          <input type="date" class="form-control" formControlName="startDate"
@@ -89,10 +121,16 @@
            [min]="(rentForm.value.startDate && rentForm.value.endDate === rentForm.value.startDate) ? (rentForm.value.startTime || '00:00') : null">
       </div>
       <div class="col-12 d-flex flex-wrap align-items-end gap-2">
-        <button class="btn btn-success flex-grow-1" type="submit" [disabled]="isRentSaving">
+        <button class="btn btn-success flex-grow-1" type="submit" [disabled]="isRentSaving || !auth.isLoggedIn()">
           {{ editingRental ? 'Zapisz zmiany' : 'Dodaj termin' }}
         </button>
         <button class="btn btn-outline-secondary" type="button" *ngIf="editingRental" (click)="cancelRentalEdit()">Anuluj</button>
+      </div>
+
+      <div class="col-12" *ngIf="!auth.isLoggedIn()">
+        <div class="alert alert-warning py-2 px-3 mt-2 mb-0">
+          Aby dodać termin, zaloguj się. Po zalogowaniu wrócisz na tę stronę.
+        </div>
       </div>
     </form>
 

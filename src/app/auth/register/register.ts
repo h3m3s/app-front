@@ -1,16 +1,16 @@
-import { Component} from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth-service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: false,
-  templateUrl: './login.html',
-  styleUrls: ['./login.scss'],
+  templateUrl: './register.html',
+  styleUrls: ['./register.scss'],
 })
-export class Login {
+export class Register {
   form!: FormGroup;
   isSubmitting = false;
   error: string | null = null;
@@ -23,14 +23,13 @@ export class Login {
 
   ngOnInit(): void {
     if (this.auth.isLoggedIn()) {
-      // already logged in -> redirect to main
       this.router.navigateByUrl('/main-cars');
       return;
     }
     this.form = this.fb.group({
-      usernameOrEmail: ['', [Validators.required, Validators.minLength(3)]],
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      remember: [false]
     });
   }
 
@@ -41,12 +40,12 @@ export class Login {
     }
     this.isSubmitting = true;
     this.error = null;
-    const { usernameOrEmail, password } = this.form.value;
-    this.auth.login(usernameOrEmail, password)
+    const { username, email, password } = this.form.value;
+    this.auth.register(username, email, password)
       .pipe(finalize(() => this.isSubmitting = false))
       .subscribe({
-        next: () => this.router.navigateByUrl('/'),
-        error: (err) => this.error = err.message || 'Login failed'
+        next: () => this.router.navigateByUrl('/login'),
+        error: (err) => this.error = err.message || 'Registration failed'
       });
   }
 

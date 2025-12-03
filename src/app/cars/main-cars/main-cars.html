@@ -1,7 +1,7 @@
 <div class="cars-wrapper container-fluid px-4 py-3">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
     <h1 class="h4 text-light mb-0">Wyszukaj</h1>
-    <button 
+    <button *ngIf="auth.isPermitted()" 
       type="button" 
       class="btn btn-outline-success shadow-sm" 
       (click)="openModal('add', $event)"
@@ -15,15 +15,15 @@
         <div class="row g-3 align-items-end">
           <div class="col-12 col-lg-4">
             <label class="form-label text-secondary small">Marka / Model</label>
-            <input class="form-control" placeholder="np. Audi A4" formControlName="search">
+            <input class="form-control"  formControlName="search">
           </div>
           <div class="col-6 col-lg-2">
             <label class="form-label text-secondary small">Min cena</label>
-            <input class="form-control" type="number" placeholder="Min" formControlName="minPrice">
+            <input class="form-control" type="number" formControlName="minPrice">
           </div>
           <div class="col-6 col-lg-2">
             <label class="form-label text-secondary small">Max cena</label>
-            <input class="form-control" type="number" placeholder="Max" formControlName="maxPrice">
+            <input class="form-control" type="number" formControlName="maxPrice">
           </div>
           <div class="col-12 col-lg-4">
             <label class="form-label text-secondary small">Sortowanie</label>

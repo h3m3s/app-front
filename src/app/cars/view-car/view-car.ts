@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CarsService } from '../cars-service';
 import { lastValueFrom, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AddModCar } from '../add-mod-car/add-mod-car';
 import { takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../auth/auth-service';
 
 @Component({
   selector: 'app-view-car',
@@ -22,6 +23,11 @@ export class ViewCar implements OnDestroy {
   protected isLoading: boolean = true;
   protected returnPage = 1;
   protected rentals: any[] = [];
+  protected users: any[] = [];
+  protected selectedUserId: number | null = null;
+  protected loadedUser: any | null = null;
+  protected usersLoading = false;
+  @ViewChild('userModal') protected userModal!: TemplateRef<any>;
   protected rentalsLoading = false;
   protected rentForm: FormGroup;
   protected isRentSaving = false;
@@ -36,7 +42,8 @@ export class ViewCar implements OnDestroy {
     private readonly router: Router,
     private readonly fb: FormBuilder
     ,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    public readonly auth: AuthService
   ) {
     this.rentForm = this.fb.group({
       startDate: ['', Validators.required],
@@ -55,6 +62,9 @@ export class ViewCar implements OnDestroy {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.returnPage = Number(params['page']) || 1;
     });
+    if (this.auth.isPermitted()) {
+      this.loadUsers();
+    }
   }
 
   ngOnDestroy(): void {
@@ -110,9 +120,79 @@ export class ViewCar implements OnDestroy {
     });
   }
 
+  private loadUsers(): void {
+    this.usersLoading = true;
+    this.carsService.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.users = data || [];
+        this.usersLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error while fetching users', err);
+        this.usersLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  protected loadSelectedUser(): void {
+    if (!this.selectedUserId) return;
+    this.carsService.getUser(this.selectedUserId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (u) => {
+        this.loadedUser = u;
+        this.cdr.markForCheck();
+        // open modal to show user details (without password)
+        try {
+          this.modalService.open(this.userModal, { size: 'md' });
+        } catch (e) {
+          console.warn('Modal open failed', e);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load user', err);
+        this.loadedUser = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  protected get loadedUserSafe(): any | null {
+    if (!this.loadedUser) return null;
+    const { password, ...rest } = this.loadedUser as any;
+    return rest;
+  }
+
+  private hasOverlap(startIso: string, endIso: string, excludeId?: number | null): boolean {
+    const toTs = (iso: string) => {
+      if (!iso) return NaN;
+      if (iso.endsWith('Z')) return new Date(iso).getTime();
+      // if format YYYY-MM-DDTHH:MM, append seconds and Z
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso)) {
+        return new Date(iso + ':00.000Z').getTime();
+      }
+      return new Date(iso).getTime();
+    };
+    const startTs = toTs(startIso);
+    const endTs = toTs(endIso);
+    if (!startTs || !endTs) return false;
+    for (const r of this.rentals) {
+      if (excludeId && r.id === excludeId) continue;
+      const existingStart = toTs(r.startIso || r.startDate || (r.startDate + 'T' + (r.startTime || '00:00')));
+      const existingEnd = toTs(r.endIso || r.endDate || (r.endDate + 'T' + (r.endTime || '00:00')));
+      if (!existingStart || !existingEnd) continue;
+      const overlap = !(existingEnd <= startTs || existingStart >= endTs);
+      if (overlap) return true;
+    }
+    return false;
+  }
+
   protected startAddRental(): void {
     this.editingRental = null;
     this.rentForm.reset({ startDate: '', startTime: '', endDate: '', endTime: '' });
+    // reset admin selection when starting a new rental
+    this.selectedUserId = null;
+    this.loadedUser = null;
   }
 
   protected editRental(rent: any): void {
@@ -123,6 +203,12 @@ export class ViewCar implements OnDestroy {
       endDate: rent.endDate || '',
       endTime: rent.endTime || '',
     });
+    // if admin, pre-select assigned user
+    if (this.auth.isPermitted()) {
+      const uid = rent.userId ?? rent.user_id ?? rent.userId ?? null;
+      this.selectedUserId = uid ?? null;
+      if (this.selectedUserId) this.loadSelectedUser();
+    }
   }
 
   protected cancelRentalEdit(): void {
@@ -150,9 +236,35 @@ export class ViewCar implements OnDestroy {
       this.rentError = 'Data zakończenia nie może być wcześniejsza niż rozpoczęcia.';
       return;
     }
+
+    // Client-side overlap check (prevent submission if overlaps existing rentals)
+    const editingId = this.editingRental?.id ?? null;
+    if (this.hasOverlap(startIso, endIso, editingId)) {
+      this.rentError = 'Wybrany termin koliduje z istniejącą rezerwacją.';
+      this.isRentSaving = false;
+      return;
+    }
     this.isRentSaving = true;
     this.rentError = null;
-    const payload = { startDate: startIso, endDate: endIso };
+    const payload: any = { startDate: startIso, endDate: endIso };
+    if (!this.auth.isLoggedIn()) {
+      window.alert('Musisz się zalogować, aby dodać termin.');
+      // Redirect to login and return back to this car view after successful login
+      const returnUrl = `/view-car/${this.car?.id}?page=${this.returnPage}`;
+      try {
+        this.router.navigate(['/login'], { queryParams: { returnUrl } });
+      } catch {}
+      this.isRentSaving = false;
+      return;
+    }
+    if (!this.auth.isPermitted()) {
+      // normal user: ensure rent is assigned to them
+      payload.userId = this.auth.currentUser?.id;
+    }
+    else {
+      // admin: allow selecting user via selector
+      if (this.selectedUserId) payload.userId = Number(this.selectedUserId);
+    }
     const request$ = this.editingRental
       ? this.carsService.updateRental(this.editingRental.id, payload)
       : this.carsService.addRental({ carId: this.car.id, ...payload });

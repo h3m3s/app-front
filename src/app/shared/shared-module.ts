@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Header } from './header/header';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -10,6 +11,7 @@ import { Header } from './header/header';
   ],
   imports: [
     CommonModule,
+    RouterModule,
   ],
   exports: [
     Header

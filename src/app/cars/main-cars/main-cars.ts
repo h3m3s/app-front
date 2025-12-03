@@ -7,6 +7,7 @@ import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, finalize, filter, takeUntil } from 'rxjs/operators';
 import { NavigationEnd } from '@angular/router';
 import { AddModCar } from '../add-mod-car/add-mod-car';
+import { AuthService } from '../../auth/auth-service';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -47,6 +48,8 @@ export class MainCars implements OnInit, OnDestroy {
     private readonly fb: FormBuilder
     ,
     private readonly cdr: ChangeDetectorRef
+  ,
+    public auth: AuthService
   ) {}
 
   ngOnInit() {
