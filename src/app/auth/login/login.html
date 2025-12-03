@@ -16,6 +16,9 @@
 					Min. 6 znaków.
 				</div>
 			</div>
+			<div class="register-button-container d-flex align-items-center justify-content-end w-100">
+				<a [routerLink]="['/register']">Nie masz u nas konta?</a>
+			</div>
 			<div class="form-check mb-3">
 				<input class="form-check-input" type="checkbox" id="remember" formControlName="remember" />
 				<label class="form-check-label" for="remember">Zapamiętaj mnie</label>
@@ -24,7 +27,6 @@
 				<span *ngIf="!isSubmitting">Zaloguj</span>
 				<span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
 			</button>
-			<a class="btn btn-outline-secondary w-100" [routerLink]="['/register']">Przejdź do rejestracji</a>
 			<div *ngIf="error" class="alert alert-danger py-2 px-3 mb-0 small">{{ error }}</div>
 		</form>
 	</div>

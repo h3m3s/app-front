@@ -17,11 +17,13 @@
         <input type="password" formControlName="password" class="form-control" [class.is-invalid]="fieldInvalid('password')" placeholder="••••••" autocomplete="new-password" />
         <div class="invalid-feedback" *ngIf="fieldInvalid('password')">Min. 6 znaków.</div>
       </div>
+      <div class="login-button-container d-flex align-items-center justify-content-end w-100">
+        <a [routerLink]="['/login']">Masz już konto?</a>
+      </div>
       <button class="btn btn-primary w-100 mb-2" type="submit" [disabled]="isSubmitting || form.invalid">
         <span *ngIf="!isSubmitting">Zarejestruj</span>
         <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
       </button>
-      <a class="btn btn-outline-secondary w-100" [routerLink]="['/login']">Przejdź do logowania</a>
       <div *ngIf="error" class="alert alert-danger py-2 px-3 mb-0 small">{{ error }}</div>
     </form>
   </div>
