@@ -48,7 +48,7 @@
         this.form.markAllAsTouched();
         return;
       }
-      const carToSave: any = { ...this.form.value, price: Number(this.form.value.price) };
+      const carToSave: CarsModel = { ...this.form.value, price: Number(this.form.value.price) };
       if (!this.add && this.car?.id) carToSave.id = this.car.id;
       this.activeModal.close({ save: carToSave, file: this.selectedFile, isNew: this.add });
     }

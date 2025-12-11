@@ -1,0 +1,105 @@
+.login-modal {
+	width: min(90vw, 420px);
+	min-height: 520px;
+	margin: 0 auto;
+	padding: 3rem 2.5rem;
+	background: linear-gradient(180deg, #2a2a72 0%, #009ffd 100%);
+	border-radius: 0;
+	color: #f5f5f5;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2rem;
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+	text-align: left;
+}
+
+.login-modal__header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.login-modal__header .eyebrow {
+	font-size: 0.85rem;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.login-modal__header h2 {
+	font-size: clamp(1.8rem, 1.2rem + 1.8vw, 2.4rem);
+	margin: 0;
+	font-weight: 600;
+}
+
+.login-modal__header .subtitle {
+	font-size: 0.95rem;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.login-modal__form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.login-modal__form label {
+	font-size: 0.85rem;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.login-modal__form input {
+	border: none;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.65);
+	padding: 0.6rem 0;
+	background: transparent;
+	color: #fff;
+	font-size: 1rem;
+	transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.login-modal__form input:focus {
+	outline: none;
+	border-color: #fff;
+	transform: translateY(-1px);
+}
+
+.btn-login {
+	margin-top: 0.5rem;
+	width: 100%;
+	border: none;
+	border-radius: 0;
+	background: rgba(0, 0, 0, 0.2);
+	color: #fff;
+	font-weight: 600;
+	padding: 0.85rem 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-login:hover:not(:disabled) {
+	background: rgba(0, 0, 0, 0.35);
+	transform: translateY(-2px);
+}
+
+.btn-login:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.error {
+	margin: 0;
+	color: #ffddd2;
+	font-size: 0.9rem;
+}
+
+@media (max-height: 640px) {
+	.login-modal {
+		min-height: min(520px, 90vh);
+		padding: 2rem 1.5rem;
+	}
+}

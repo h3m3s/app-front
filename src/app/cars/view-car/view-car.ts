@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { CarsService } from '../cars-service';
 import { lastValueFrom, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CarsModule } from '../cars-module';
+// import { CarsModule } from '../cars-module';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AddModCar } from '../add-mod-car/add-mod-car';
 import { takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../../auth/auth-service';
+import { CarsModel } from '../../../interfaces/car-interface';
+import { Rental } from '../../../interfaces/rental-interface';
 
 @Component({
   selector: 'app-view-car',
@@ -16,34 +17,29 @@ import { AuthService } from '../../auth/auth-service';
   styleUrls: ['./view-car.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewCar implements OnDestroy {
-  protected car: any;
+export class ViewCar implements OnInit, OnDestroy {
+  protected car: CarsModel | null = null;
   protected error: string | null = null;
   protected isLoadingImage: boolean = true;
   protected isLoading: boolean = true;
   protected returnPage = 1;
-  protected rentals: any[] = [];
-  protected users: any[] = [];
-  protected selectedUserId: number | null = null;
-  protected loadedUser: any | null = null;
-  protected usersLoading = false;
-  @ViewChild('userModal') protected userModal!: TemplateRef<any>;
+  protected rentals: Rental[] = [];
+  
   protected rentalsLoading = false;
   protected rentForm: FormGroup;
-  protected isRentSaving = false;
   protected rentError: string | null = null;
-  protected editingRental: any | null = null;
-  private readonly destroy$ = new Subject<void>();
+  protected editingRental: Rental | null = null;
+  protected isRentSaving = false;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     public carsService: CarsService,
     private route: ActivatedRoute,
-    private readonly modalService: NgbModal,
-    private readonly router: Router,
-    private readonly fb: FormBuilder
-    ,
-    private readonly cdr: ChangeDetectorRef,
-    public readonly auth: AuthService
+    private router: Router,
+    private modalService: NgbModal,
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder,
   ) {
     this.rentForm = this.fb.group({
       startDate: ['', Validators.required],
@@ -52,50 +48,7 @@ export class ViewCar implements OnDestroy {
       endTime: ['', Validators.required],
     });
   }
-
-  ngOnInit() {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const carId = Number(params.get('id'));
-      this.getCar(carId);
-    });
-    
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.returnPage = Number(params['page']) || 1;
-    });
-    if (this.auth.isPermitted()) {
-      this.loadUsers();
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  getCar(id: number): void {
-    this.isLoading = true;
-    this.isLoadingImage = false;
-    this.carsService.getCar(id).subscribe({
-      next: (data) => {
-        this.car = data;
-        
-        this.isLoadingImage = !!(this.car?.photo);
-        this.isLoading = false;
-        if (this.car?.id) {
-          this.loadRentals(this.car.id);
-        }
-        this.cdr.markForCheck();
-        setTimeout(() => { try { this.cdr.detectChanges(); } catch(e) { } });
-      },
-      error: (err) => {
-        console.error('Error while fetching car', err);
-        this.isLoading = false;
-        this.isLoadingImage = false;
-        this.cdr.markForCheck();
-        setTimeout(() => { try { this.cdr.detectChanges(); } catch(e) { } });
-      },
-    });
-  }
+  
 
   private loadRentals(carId: number): void {
     this.rentalsLoading = true;
@@ -118,49 +71,6 @@ export class ViewCar implements OnDestroy {
         this.cdr.markForCheck();
       },
     });
-  }
-
-  private loadUsers(): void {
-    this.usersLoading = true;
-    this.carsService.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-        this.users = data || [];
-        this.usersLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Error while fetching users', err);
-        this.usersLoading = false;
-        this.cdr.markForCheck();
-      },
-    });
-  }
-
-  protected loadSelectedUser(): void {
-    if (!this.selectedUserId) return;
-    this.carsService.getUser(this.selectedUserId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (u) => {
-        this.loadedUser = u;
-        this.cdr.markForCheck();
-        // open modal to show user details (without password)
-        try {
-          this.modalService.open(this.userModal, { size: 'md' });
-        } catch (e) {
-          console.warn('Modal open failed', e);
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load user', err);
-        this.loadedUser = null;
-        this.cdr.markForCheck();
-      },
-    });
-  }
-
-  protected get loadedUserSafe(): any | null {
-    if (!this.loadedUser) return null;
-    const { password, ...rest } = this.loadedUser as any;
-    return rest;
   }
 
   private hasOverlap(startIso: string, endIso: string, excludeId?: number | null): boolean {
@@ -190,12 +100,10 @@ export class ViewCar implements OnDestroy {
   protected startAddRental(): void {
     this.editingRental = null;
     this.rentForm.reset({ startDate: '', startTime: '', endDate: '', endTime: '' });
-    // reset admin selection when starting a new rental
-    this.selectedUserId = null;
-    this.loadedUser = null;
+    // reset rental form state
   }
 
-  protected editRental(rent: any): void {
+  protected editRental(rent: Rental): void {
     this.editingRental = rent;
     this.rentForm.setValue({
       startDate: rent.startDate || '',
@@ -203,12 +111,7 @@ export class ViewCar implements OnDestroy {
       endDate: rent.endDate || '',
       endTime: rent.endTime || '',
     });
-    // if admin, pre-select assigned user
-    if (this.auth.isPermitted()) {
-      const uid = rent.userId ?? rent.user_id ?? rent.userId ?? null;
-      this.selectedUserId = uid ?? null;
-      if (this.selectedUserId) this.loadSelectedUser();
-    }
+    // edit rental data loaded; no role-based behavior
   }
 
   protected cancelRentalEdit(): void {
@@ -246,25 +149,7 @@ export class ViewCar implements OnDestroy {
     }
     this.isRentSaving = true;
     this.rentError = null;
-    const payload: any = { startDate: startIso, endDate: endIso };
-    if (!this.auth.isLoggedIn()) {
-      window.alert('Musisz się zalogować, aby dodać termin.');
-      // Redirect to login and return back to this car view after successful login
-      const returnUrl = `/view-car/${this.car?.id}?page=${this.returnPage}`;
-      try {
-        this.router.navigate(['/login'], { queryParams: { returnUrl } });
-      } catch {}
-      this.isRentSaving = false;
-      return;
-    }
-    if (!this.auth.isPermitted()) {
-      // normal user: ensure rent is assigned to them
-      payload.userId = this.auth.currentUser?.id;
-    }
-    else {
-      // admin: allow selecting user via selector
-      if (this.selectedUserId) payload.userId = Number(this.selectedUserId);
-    }
+    const payload: { startDate: string; endDate: string } = { startDate: startIso, endDate: endIso };
     const request$ = this.editingRental
       ? this.carsService.updateRental(this.editingRental.id, payload)
       : this.carsService.addRental({ carId: this.car.id, ...payload });
@@ -273,44 +158,49 @@ export class ViewCar implements OnDestroy {
       next: () => {
         this.isRentSaving = false;
         this.startAddRental();
-        this.loadRentals(this.car.id);
+        if (this.car?.id) {
+          this.loadRentals(this.car.id);
+        }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Rental save failed', err);
         this.isRentSaving = false;
         this.rentError = err?.error?.message || 'Nie udało się zapisać terminu.';
         this.cdr.markForCheck();
-      },
+      }
     });
+    
   }
 
   // Ensure end time is not earlier than start time on same-day selection
   onRentStartTimeChange(): void {
-    const val = this.rentForm.value;
+    const val: any = this.rentForm.value;
     const sameDay = !!val.startDate && val.endDate === val.startDate;
     if (sameDay && val.endTime && val.startTime && val.endTime < val.startTime) {
       this.rentForm.patchValue({ endTime: val.startTime });
     }
   }
 
-  protected deleteRental(rent: any): void {
-    if (!rent?.id) return;
-    const confirmation = window.confirm('Czy na pewno usunąć ten termin?');
-    if (!confirmation) return;
-    this.carsService.deleteRental(rent.id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        if (this.editingRental?.id === rent.id) {
-          this.startAddRental();
-        }
-        this.loadRentals(this.car?.id);
-      },
-      error: (err) => {
-        console.error('Rental delete failed', err);
-        this.rentError = err?.error?.message || 'Nie udało się usunąć terminu.';
-        this.cdr.markForCheck();
-      },
-    });
-  }
+  // protected deleteRental(rent: Rental): void {
+  //   if (!rent?.id) return;
+  //   const confirmation = window.confirm('Czy na pewno usunąć ten termin?');
+  //   if (!confirmation) return;
+  //   this.carsService.deleteRental(rent.id).pipe(takeUntil(this.destroy$)).subscribe({
+  //     next: () => {
+  //       if (this.editingRental?.id === rent.id) {
+  //         this.startAddRental();
+  //       }
+  //       if (this.car?.id) {
+  //         this.loadRentals(this.car.id);
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Rental delete failed', err);
+  //       this.rentError = err?.error?.message || 'Nie udało się usunąć terminu.';
+  //       this.cdr.markForCheck();
+  //     },
+  //   });
+  // }
 
   private parseDateTime(value: string | null | undefined, prefix: 'start' | 'end'): Record<string, string> {
     if (!value) {
@@ -318,7 +208,7 @@ export class ViewCar implements OnDestroy {
         [`${prefix}Date`]: '',
         [`${prefix}Time`]: '',
         [`${prefix}Iso`]: '',
-      } as any;
+      };
     }
     const normalized = value.replace(' ', 'T');
     const date = normalized.substring(0, 10);
@@ -327,7 +217,7 @@ export class ViewCar implements OnDestroy {
       [`${prefix}Date`]: date,
       [`${prefix}Time`]: time,
       [`${prefix}Iso`]: `${date}T${time}`,
-    } as any;
+    };
   }
 
   private combineDateTime(date: string, time: string): string {
@@ -335,6 +225,39 @@ export class ViewCar implements OnDestroy {
       return '';
     }
     return `${date}T${time}:00.000Z`;
+  }
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? Number(idParam) : NaN;
+    if (!isNaN(id)) {
+      this.getCar(id);
+      this.loadRentals(id);
+    } else {
+      this.isLoading = false;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private getCar(id: number): void {
+    this.isLoading = true;
+    this.carsService.getCar(id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.car = data as CarsModel;
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading car', err);
+        this.error = 'Nie udało się pobrać samochodu.';
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   onImageLoad() {
@@ -349,7 +272,11 @@ export class ViewCar implements OnDestroy {
     this.cdr.markForCheck();
   }
 
-  openModal(action: 'add' | 'modify', event?: Event, carFromHtml?: CarsModule) {
+  public getImageUrl(photo?: string | null): string {
+    return this.carsService.getImageUrl(photo);
+  }
+
+  openModal(action: 'add' | 'modify', event?: Event, carFromHtml?: CarsModel) {
     if (event) event.stopPropagation();
 
     const modalRef = this.modalService.open(AddModCar, { size: 'lg' });
@@ -406,12 +333,11 @@ export class ViewCar implements OnDestroy {
       }
       
       if (isNew) {
-        this.carsService.addCar(save).subscribe({
+            this.carsService.addCar(save).subscribe({
           next: (res) => {
-            
-            
-            this.carsService.refreshCarsCache();
-            this.router.navigate(['/main-cars'], { queryParams: { page: this.returnPage } });
+            this.carsService.getCars().subscribe(() => {
+              this.router.navigate(['/main-cars'], { queryParams: { page: this.returnPage } });
+            });
           },
           error: (err) => {
             console.error('Add car error', err, err.status, err.statusText, err.error);
@@ -419,10 +345,9 @@ export class ViewCar implements OnDestroy {
           },
         });
       } else {
-        this.carsService.updateCar(save).subscribe({
+            this.carsService.updateCar(save).subscribe({
           next: (res) => {
-            this.carsService.refreshCarsCache();
-            this.getCar(save.id);
+            this.carsService.getCars().subscribe(() => this.getCar(save.id));
           },
           error: (err) => console.error('Update car error', err),
         });

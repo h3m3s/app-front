@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject, of } from 'rxjs'; 
 import { shareReplay, switchMap, startWith } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { CarsModule } from './cars-module';
 import { CarsModel } from '../../interfaces/car-interface';
+import { User } from '../../interfaces/user-interface';
+import { Rental, RentalPayload } from '../../interfaces/rental-interface';
+import { PhotoUploadResponse } from '../../interfaces/modal-result-interface';
 import { AuthService } from '../auth/auth-service';
 
 @Injectable({
@@ -16,29 +19,25 @@ export class CarsService {
   private authApiUrl = 'http://localhost:3000/auth';
   
   public imgBase = 'http://localhost:3000/img';
-  private imageVersion = Date.now();
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  private imageVersion = Date.now();  
+  constructor(private http: HttpClient, private auth: AuthService) {
+  }
 
-  private _refreshCars$ = new Subject<void>();
-  private cachedCars$: Observable<CarsModel[]> | null = null;
+  private getHttpOptions(): { headers?: HttpHeaders } {
+    const token = this.auth?.getToken ? this.auth.getToken() : null;
+    if (token) {
+      return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+    }
+    return {};
+  }
 
   private rowsPerPage = 15;
   private currentPage = 1;
-  getCars(): Observable<CarsModel[]> {
-    
-    if (!this.cachedCars$) {
-      this.cachedCars$ = this._refreshCars$.pipe(
-        startWith(void 0),
-        switchMap(() => this.http.get<CarsModel[]>(this.apiUrl)),
-        shareReplay({ bufferSize: 1, refCount: true })
-      );
-    }
-    return this.cachedCars$;
-  }
 
-  
-  refreshCarsCache() {
-    this._refreshCars$.next();
+  // Always fetch fresh data from the server. No caching.
+  getCars(): Observable<CarsModel[]> {
+    const options = this.getHttpOptions();
+    return this.http.get<CarsModel[]>(this.apiUrl, options);
   }
   bumpImageVersion() {
     this.imageVersion = Date.now();
@@ -50,8 +49,8 @@ export class CarsService {
   addCar(car: CarsModel): Observable<string> { 
     const url = `${this.apiUrl}/add`;
     
-    return this.http.post(url, car, { responseType: 'text' as 'json' }).pipe(
-      map((res: any) => String(res)),
+    return this.http.post<string>(url, car, { responseType: 'text' as 'json' }).pipe(
+      map((res) => String(res)),
     );
   }
   
@@ -63,8 +62,8 @@ export class CarsService {
   }): Observable<CarsModel[] | string> {
     const url = `${this.apiUrl}/search`;
     
-    return this.http.post(url, criteria, { responseType: 'text' as 'json' }).pipe(
-      map((txt: any) => {
+    return this.http.post<string>(url, criteria, { ...this.getHttpOptions(), responseType: 'text' as 'json' }).pipe(
+      map((txt) => {
         if (!txt) return 'Brak wyników';
         const body = String(txt);
         
@@ -83,21 +82,21 @@ export class CarsService {
       throw new Error('Car ID is required for update');
     }
     const url = `${this.apiUrl}/${car.id}`;
-    return this.http.patch<CarsModel>(url, car);
+    return this.http.patch<CarsModel>(url, car, this.getHttpOptions());
   }
   delCar(id: number): Observable<CarsModule> {
     const url = `${this.apiUrl}/${id}`;
-    return this.http.delete(url);
+    return this.http.delete(url, this.getHttpOptions());
   }
   
   uploadCarPhoto(fileData: FormData): Observable<{ filename: string; path: string }> {
-    return this.http.post<{ filename: string; path: string }>('http://localhost:3000/upload', fileData);
+    return this.http.post<{ filename: string; path: string }>('http://localhost:3000/upload', fileData, this.getHttpOptions());
   }
 
   
-  uploadCarPhotoForCar(id: number, fileData: FormData): Observable<any> {
+  uploadCarPhotoForCar(id: number, fileData: FormData): Observable<PhotoUploadResponse> {
     const url = `http://localhost:3000/upload/car/${id}`;
-    return this.http.post(url, fileData);
+    return this.http.post<PhotoUploadResponse>(url, fileData, this.getHttpOptions());
   }
 
   
@@ -123,27 +122,28 @@ export class CarsService {
   }
 
   /* Rentals */
-  getRentalsForCar(carId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.rentApiUrl}/car/${carId}`);
+  getRentalsForCar(carId: number): Observable<Rental[]> {
+    return this.http.get<Rental[]>(`${this.rentApiUrl}/car/${carId}`, this.getHttpOptions());
   }
 
-  getUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.authApiUrl}/users`);
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.authApiUrl}/users`, this.getHttpOptions());
   }
 
-  getUser(id: number): Observable<any> {
-    return this.http.get<any>(`${this.authApiUrl}/user/${id}`);
+  getUser(id: number): Observable<User> {
+    return this.http.get<User>(`${this.authApiUrl}/user/${id}`, this.getHttpOptions());
   }
 
-  addRental(payload: { carId: number; startDate: string; endDate: string }): Observable<any> {
-    const body: any = { startDate: payload.startDate, endDate: payload.endDate };
-    const user = this.auth.currentUser;
-    if (user && user.id) body.userId = user.id;
-    return this.http.post(`${this.rentApiUrl}/car/${payload.carId}`, body);
+  // addRental(payload: { carId: number; startDate: string; endDate: string }): Observable<Rental> {
+  // add a rental for a car
+  addRental(payload: { carId: number; startDate: string; endDate: string }): Observable<Rental> {
+    const body: RentalPayload & { userId?: number } = { startDate: payload.startDate, endDate: payload.endDate };
+    // if authentication is present, backend may associate user by token; we don't attach user here
+    return this.http.post<Rental>(`${this.rentApiUrl}/car/${payload.carId}`, body);
   }
 
-  updateRental(rentalId: number, payload: { startDate: string; endDate: string }): Observable<any> {
-    return this.http.patch(`${this.rentApiUrl}/${rentalId}`, payload);
+  updateRental(rentalId: number, payload: { startDate: string; endDate: string }): Observable<Rental> {
+    return this.http.patch<Rental>(`${this.rentApiUrl}/${rentalId}`, payload);
   }
 
   deleteRental(rentalId: number): Observable<void> {

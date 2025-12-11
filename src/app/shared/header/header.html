@@ -1,14 +1,5 @@
 <header>
     <img src="logo.png" alt="Car Rental Logo" width="50px">
     <h1>Car Rental</h1>
-        <div class="auth-actions ms-auto d-flex align-items-center gap-4 me-5">
-            <ng-container *ngIf="!auth.isLoggedIn(); else logged">
-                <a class="btn btn-outline-light btn-sm" [routerLink]="['/login']">Zaloguj</a>
-                <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/register']">Zarejestruj</a>
-            </ng-container>
-            <ng-template #logged>
-                <div class="text-light small">{{ auth.currentUser?.username }}</div>
-                <button class="btn btn-outline-light btn-sm" (click)="logout()">Wyloguj</button>
-            </ng-template>
-        </div>
+    <button class="btn btn-secondary" (click)="logOut()">Wyloguj</button>
 </header>

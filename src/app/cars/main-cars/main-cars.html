@@ -1,34 +1,34 @@
 <div class="cars-wrapper container-fluid px-4 py-3">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-    <h1 class="h4 text-light mb-0">Wyszukaj</h1>
-    <button *ngIf="auth.isPermitted()" 
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <h1 class="h3 text-light mb-0">Wyszukaj Samochód</h1>
+    <button 
       type="button" 
-      class="btn btn-outline-success shadow-sm" 
-      (click)="openModal('add', $event)"
+      class="btn btn-success fw-6" 
+      (click)="openModAddModal('add', $event)"
     >
-      Dodaj Samochód
+      + Dodaj Samochód
     </button>
   </div>
-  <div class="row mb-3">
+  <div class="row mb-4">
     <div class="col-12">
-      <form [formGroup]="searchForm" class="search-bar card bg-dark border border-secondary rounded-3 px-3 py-3 shadow-sm" role="search">
+      <form [formGroup]="searchForm" class="search-bar" role="search">
         <div class="row g-3 align-items-end">
           <div class="col-12 col-lg-4">
             <label class="form-label text-secondary small">Marka / Model</label>
-            <input class="form-control"  formControlName="search">
+            <input class="form-control" placeholder="np. Toyota Corolla" formControlName="search">
           </div>
           <div class="col-6 col-lg-2">
             <label class="form-label text-secondary small">Min cena</label>
-            <input class="form-control" type="number" formControlName="minPrice">
+            <input class="form-control" type="number" placeholder="0" formControlName="minPrice">
           </div>
           <div class="col-6 col-lg-2">
             <label class="form-label text-secondary small">Max cena</label>
-            <input class="form-control" type="number" formControlName="maxPrice">
+            <input class="form-control" type="number" placeholder="9999" formControlName="maxPrice">
           </div>
           <div class="col-12 col-lg-4">
             <label class="form-label text-secondary small">Sortowanie</label>
             <div class="d-flex flex-column gap-2 flex-sm-row flex-lg-column">
-              <select class="form-select bg-dark text-light border-secondary" formControlName="sort" name="sortOption">
+              <select class="form-select" formControlName="sort" name="sortOption">
                 <option value="relevance">Od najtrafniejszych</option>
                 <option value="name.asc">Nazwa: A-Z</option>
                 <option value="name.desc">Nazwa: Z-A</option>

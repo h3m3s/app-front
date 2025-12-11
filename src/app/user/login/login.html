@@ -1,0 +1,37 @@
+<div class="login-modal bg-gradient-vertical">
+    <div class="login-modal__header">
+        <p class="eyebrow">Brak autoryzacji</p>
+        <h2>Zaloguj się</h2>
+        <p class="subtitle">Wprowadź dane, aby otrzymać dostęp do panelu samochodów.</p>
+    </div>
+
+    <form #formLogin="ngForm" (ngSubmit)="onLogin(formLogin)" class="login-modal__form">
+        <label for="Email">Email</label>
+        <input
+            type="email"
+            id="Email"
+            name="Email"
+            ngModel
+            required
+            autocomplete="email"
+            inputmode="email"
+        />
+
+        <label for="password">Hasło</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            ngModel
+            required
+            autocomplete="current-password"
+            minlength="6"
+        />
+
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <button class="btn-login" type="submit" [disabled]="isSubmitting || formLogin.invalid">
+            {{ isSubmitting ? 'Logowanie...' : 'Zaloguj się' }}
+        </button>
+    </form>
+</div>

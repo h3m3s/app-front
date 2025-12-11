@@ -8,7 +8,7 @@
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
-  <div class="card" >
+  <div class="card card-info" >
     <div *ngIf="isLoading" class="spinner-overlay">
       <div class="spinner-border text-light" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -19,8 +19,8 @@
       <div [class.opacity-50]="isLoading">Cena: <b>{{car?.price}} zł/12h</b></div>
       <div [class.opacity-50]="isLoading">Identyfikator Pojazdu: <b>#{{car?.id}}</b></div>
       <div class="menage-buttons">
-        <button *ngIf="auth.isPermitted()" class="btn btn-outline-warning" (click)="openModal('modify', $event,  car)">Modyfikuj</button>
-        <button *ngIf="auth.isPermitted()" class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button>
+        <!-- <button class="btn btn-outline-warning" (click)="openModal('modify', $event,  car)">Modyfikuj</button> -->
+        <!-- <button class="btn btn-outline-danger" (click)="delCar(car.id, $event)">Usuń</button> -->
       </div>
   </div>
   <div class="card image position-relative">
@@ -32,7 +32,7 @@
         </div>
 
         <img 
-          [src]="carsService.getImageUrl(car?.photo)" 
+          [src]="getImageUrl(car?.photo)" 
           alt="Car image"
           class="img-fluid"
           style="width: 100%; height: 100%; object-fit: cover; background: #181818;"
@@ -44,62 +44,8 @@
       </div>
   </div>
 
-  <div class="card rentals">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-      <h5 class="mb-0">Terminy wypożyczeń</h5>
-    </div>
-
-    <div *ngIf="rentalsLoading" class="text-muted small">Ładowanie terminów...</div>
-    <div *ngIf="!rentalsLoading && rentals.length === 0" class="text-muted small">Brak zapisanych wypożyczeń dla tego auta.</div>
-
-    <div class="list-group border-0" *ngIf="rentals.length">
-      <div class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center px-0" *ngFor="let rent of rentals">
-        <div>
-          <div class="fw-semibold">
-            {{ rent.startDate }} {{ rent.startTime }} → {{ rent.endDate }} {{ rent.endTime }}
-          </div>
-        </div>
-        <div class="btn-group btn-group-sm">
-          <button *ngIf="auth.isPermitted()" class="btn btn-outline-warning" (click)="editRental(rent)">Edytuj</button>
-          <button *ngIf="auth.isPermitted()" class="btn btn-outline-danger" (click)="deleteRental(rent)">Usuń</button>
-        </div>
-      </div>
-    </div>
-
-    <form class="rent-form row g-3 mt-2" [formGroup]="rentForm" (ngSubmit)="saveRental()">
-      <div class="col-12" *ngIf="auth.isPermitted()">
-        <label class="form-label text-secondary small">Przypisz użytkownika (admin)</label>
-        <div class="d-flex gap-2 align-items-end">
-          <select class="form-select flex-grow-1" [disabled]="usersLoading" (change)="selectedUserId = $any($event.target).value">
-            <option value="">-- wybierz użytkownika --</option>
-            <option *ngFor="let u of users" [value]="u.id">{{ u.username || u.user || u.email }}</option>
-          </select>
-          <button type="button" class="btn btn-outline-primary" (click)="loadSelectedUser()" [disabled]="!selectedUserId">Załaduj</button>
-          <div *ngIf="loadedUser" class="small text-muted ms-3">Wybrano: <b>{{ loadedUser.username || loadedUser.user || loadedUser.email }}</b></div>
-        </div>
-      </div>
-
-      <!-- User details modal (admin) -->
-      <ng-template #userModal let-modal>
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title">Szczegóły użytkownika</h5>
-          <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="modal.dismiss()"></button>
-        </div>
-        <div class="modal-body bg-light text-dark user-modal">
-          <div *ngIf="loadedUserSafe; else noUser">
-            <div class="mb-2"><strong>ID:</strong> {{ loadedUserSafe.id }}</div>
-            <div class="mb-2"><strong>Login:</strong> {{ loadedUserSafe.username || loadedUserSafe.user }}</div>
-            <div class="mb-2"><strong>Email:</strong> {{ loadedUserSafe.email }}</div>
-            <div class="mb-2"><strong>Uprawnienia:</strong> {{ loadedUserSafe.isPermitted ? 'Admin' : 'Użytkownik' }}</div>
-          </div>
-          <ng-template #noUser>
-            <div class="text-muted">Brak danych użytkownika.</div>
-          </ng-template>
-        </div>
-        <div class="modal-footer bg-dark">
-          <button type="button" class="btn btn-secondary" (click)="modal.close()">Zamknij</button>
-        </div>
-      </ng-template>
+    <div class="card rentals">
+      <form class="rent-form row g-3 mt-2" [formGroup]="rentForm" (ngSubmit)="saveRental()">
       <div class="col-12 col-md-3">
         <label class="form-label text-secondary small">Data rozpoczęcia</label>
          <input type="date" class="form-control" formControlName="startDate"
@@ -121,19 +67,15 @@
            [min]="(rentForm.value.startDate && rentForm.value.endDate === rentForm.value.startDate) ? (rentForm.value.startTime || '00:00') : null">
       </div>
       <div class="col-12 d-flex flex-wrap align-items-end gap-2">
-        <button class="btn btn-success flex-grow-1" type="submit" [disabled]="isRentSaving || !auth.isLoggedIn()">
+        <button class="btn btn-success flex-grow-1" type="submit" [disabled]="isRentSaving">
           {{ editingRental ? 'Zapisz zmiany' : 'Dodaj termin' }}
         </button>
         <button class="btn btn-outline-secondary" type="button" *ngIf="editingRental" (click)="cancelRentalEdit()">Anuluj</button>
       </div>
 
-      <div class="col-12" *ngIf="!auth.isLoggedIn()">
-        <div class="alert alert-warning py-2 px-3 mt-2 mb-0">
-          Aby dodać termin, zaloguj się. Po zalogowaniu wrócisz na tę stronę.
-        </div>
-      </div>
-    </form>
+</form>
 
-    <div *ngIf="rentError" class="text-danger small mt-2">{{ rentError }}</div>
-  </div>
+      <!-- Login requirement notice removed so UI is uniform for all users -->
+      <div *ngIf="rentError" class="text-danger small mt-2">{{ rentError }}</div>
+    </div>
 </div>

@@ -1,76 +1,49 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, BehaviorSubject } from 'rxjs';
-
-export interface CurrentUser {
-  id: number;
-  username: string;
-  email: string;
-  isPermitted: boolean;
-}
-
+import { Observable, Subject, tap } from 'rxjs';
+import { JwtPayload, jwtDecode } from 'jwt-decode';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = 'http://localhost:3000/auth';
-  private userKey = 'currentUser';
-  private _user$ = new BehaviorSubject<CurrentUser | null>(this.loadUser());
+  private apiUrl = 'http://localhost:3000/auth';
+  private readonly loginRequiredSubject = new Subject<void>();
+  private readonly loginSuccessSubject = new Subject<void>();
 
+  readonly loginRequired$ = this.loginRequiredSubject.asObservable();
+  readonly loginSuccess$ = this.loginSuccessSubject.asObservable();
+  
   constructor(private http: HttpClient) {}
 
-  private loadUser(): CurrentUser | null {
-    try {
-      const raw = localStorage.getItem(this.userKey);
-      if (!raw) return null;
-      return JSON.parse(raw) as CurrentUser;
-    } catch {
-      return null;
+  login(login: string, password: string): Observable<{ access_token: string }>{
+    return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, { login, password }).pipe(
+      tap(response => {
+        // store token (do not log full token to console to avoid leaking sensitive data)
+        localStorage.setItem('access_token', response.access_token);
+        this.loginSuccessSubject.next();
+      })
+    );
+  }
+  logout(): void {
+    localStorage.removeItem('access_token');
+  }
+  requestLoginPrompt(): void {
+    this.loginRequiredSubject.next();
+  }
+  getToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    try{
+      const payload = jwtDecode<JwtPayload>(token!);
+      if(payload.exp && Date.now() >= payload.exp * 1000) {
+        this.logout();
+        return false;
+      }
+      return jwtDecode<JwtPayload>(token!).exp !== undefined;
+    }
+    catch{
+      return false;
     }
   }
-
-  private saveUser(user: CurrentUser | null) {
-    if (user) localStorage.setItem(this.userKey, JSON.stringify(user));
-    else localStorage.removeItem(this.userKey);
-    this._user$.next(user);
-  }
-
-  get currentUser(): CurrentUser | null {
-    return this._user$.value;
-  }
-
-  get user$(): Observable<CurrentUser | null> {
-    return this._user$.asObservable();
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.currentUser;
-  }
-
-  isPermitted(): boolean {
-    return !!this.currentUser && !!this.currentUser.isPermitted;
-  }
-
-  login(usernameOrEmail: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, { usernameOrEmail, password }).pipe(
-      tap((response: any) => {
-        if (response && typeof response === 'object') {
-          // backend returns user without password
-          this.saveUser(response as CurrentUser);
-        }
-      })
-    );
-  }
-
-  register(username: string, email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/register`, { username, email, password }).pipe(
-      tap((response: any) => {
-        if (response && typeof response === 'object') {
-          this.saveUser(response as CurrentUser);
-        }
-      })
-    );
-  }
-
-  logout() {
-    this.saveUser(null);
-  }
+  
 }

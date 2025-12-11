@@ -1,14 +1,47 @@
-header{
+header {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 10px;
-    background-color: #1d1d1d;   
+    padding: 18px 32px;
+    border-radius: 0 0 24px 24px;
     color: white;
+    position: relative;
 }
 *{
     font-family: "Science Gothic", sans-serif;
     font-optical-sizing: auto;
     font-weight: 200;
     font-style: normal;
+}
+
+/* Modal styles used by header to host login/register components */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    /* overlay background removed as requested */
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 9999;
+}
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    max-height: 90vh; /* keep modal within viewport */
+    overflow-y: auto; /* allow scrolling when content is tall */
+    background: transparent; /* no inner background so it doesn't block design */
+    display: flex;
+    flex-direction: column;
+}
+.modal-close {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
 }
