@@ -5,7 +5,6 @@ import { App } from './app';
 import { provideHttpClient } from '@angular/common/http';
 import { CarsModule } from './cars/cars-module';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { AuthModule } from './auth/auth-module';
 import { SharedModule } from './shared/shared-module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -21,7 +20,6 @@ import { UserModule } from './user/user-module';
     AppRoutingModule,
     RouterOutlet,
     RouterLink,
-    AuthModule,
     UserModule,
     SharedModule,
     FormsModule,

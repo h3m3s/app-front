@@ -25,49 +25,11 @@ import { AddModCar } from '../add-mod-car/add-mod-car';
 import { CarsModel } from '../../../interfaces/car-interface';
 import { ModalResult } from '../../../interfaces/modal-result-interface';
 import { AuthService } from '../../auth/auth-service';
-
-type CarView = CarsModel & {
-  _isImageLoading?: boolean;
-  _searchName: string;
-  _priceNumber: number;
-  isReserved?: boolean;
-};
-type QueryParams = {
-  search?: string | null;
-  minPrice?: number | null;
-  maxPrice?: number | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  sort?: string | null;
-  page?: number | null;
-  [key: string]: string | number | null | undefined;
-};
-type SearchCriteria = Partial<Pick<CarsModel, 'brand' | 'model'>> & {
-  minPrice?: number;
-  maxPrice?: number;
-  startDate?: string;
-  endDate?: string;
-  [key: string]: unknown;
-};
-interface SearchFormValue {
-  search: string;
-  minPrice: any;
-  maxPrice: any;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  sort: string;
-}
-interface SearchPayload {
-  criteria: SearchCriteria;
-  queryParams: QueryParams;
-  hasCriteria: boolean;
-  queryText: string;
-  minPrice: number | null;
-  maxPrice: number | null;
-  sort: string;
-}
+import { CarView } from '../../../interfaces/main-cars-car-view.interface';
+import { QueryParams } from '../../../interfaces/main-cars-query-params.interface';
+import { SearchCriteria } from '../../../interfaces/main-cars-search-criteria.interface';
+import { SearchFormValue } from '../../../interfaces/main-cars-search-form-value.interface';
+import { SearchPayload } from '../../../interfaces/main-cars-search-payload.interface';
 
 class SearchFormManager {
   static create(fb: FormBuilder, initialSort: string): FormGroup {
@@ -191,6 +153,8 @@ class CarsCollection {
   private cars: CarView[] = [];
   private filtered: CarView[] = [];
   constructor(private readonly imageLoadCache: Map<number, boolean>) {}
+
+  
   setCars(cars: CarsModel[]): void {
     this.cars = Array.isArray(cars) ? cars.map((car) => this.decorate(car)) : [];
     this.filtered = [];

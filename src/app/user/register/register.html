@@ -1,0 +1,69 @@
+<div class="login-modal bg-gradient-vertical">
+    <div class="login-modal__header">
+        <p class="eyebrow">Brak autoryzacji</p>
+        <h2>Zaloguj się</h2>
+        <p class="subtitle">Wprowadź dane, aby otrzymać dostęp do panelu samochodów.</p>
+    </div>
+
+    <form #formLogin="ngForm" (ngSubmit)="onRegister(formLogin)" class="login-modal__form">
+        <label for="Email">Email</label>
+        <input
+            type="email"
+            id="Email"
+            name="Email"
+            ngModel
+            required
+            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            autocomplete="email"
+            inputmode="email"
+        />
+        <label for="username">Nazwa Użytkownika</label>
+        <input
+            type="text"
+            id="username"
+            name="username"
+            ngModel
+            required
+            pattern="^[a-zA-Z0-9._%+-]{3,20}$"
+            autocomplete="username"
+        />
+        <label for="name">Imię</label>
+        <input
+            type="text"
+            id="name"
+            name="name"
+            ngModel
+            required
+            pattern="[A-ź]{2,12}"
+            autocomplete="name"
+            inputmode="text"
+        />
+        <label for="phone">Telefon</label>
+        <input
+            type="tel"
+            id="phone"
+            name="phone"
+            ngModel
+            required
+            pattern="^\+?[0-9]{7,15}$"
+            autocomplete="tel"
+            inputmode="tel"
+        />
+        <label for="password">Hasło</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            ngModel
+            required
+            autocomplete="current-password"
+            minlength="6"
+        />
+
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <button class="btn-login" type="submit" [disabled]="isSubmitting || formLogin.invalid">
+            {{ isSubmitting ? 'Logowanie...' : 'Zaloguj się' }}
+        </button>
+    </form>
+</div>

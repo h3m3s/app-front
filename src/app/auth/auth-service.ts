@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, tap } from 'rxjs';
 import { JwtPayload, jwtDecode } from 'jwt-decode';
+import { newUser } from '../../interfaces/user-interface';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = 'http://localhost:3000/auth';
@@ -16,9 +17,20 @@ export class AuthService {
   login(login: string, password: string): Observable<{ access_token: string }>{
     return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, { login, password }).pipe(
       tap(response => {
-        // store token (do not log full token to console to avoid leaking sensitive data)
+        if(response && response.access_token){
         localStorage.setItem('access_token', response.access_token);
         this.loginSuccessSubject.next();
+        }
+      })
+    );
+  }
+  register(data: newUser): Observable<{ access_token: string }> {
+    return this.http.post<{ access_token: string }>(`${this.apiUrl}/register`, data).pipe(
+      tap(response => {
+        if(response && response.access_token){
+         return 'Registration successful. Now you can log in.';
+        }
+        return 'Registration failed. Please try again later.';
       })
     );
   }
